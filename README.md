@@ -1,16 +1,47 @@
-# cinemind
+# 🎬 CineMind
 
-A new Flutter project.
+Welcome to **CineMind** – your **ultimate Flutter + Firebase movie recommendation app**! 🍿🎥  
+Discover trending movies, explore TV series, save favorites, and get personalized recommendations powered by **TMDb API**. 🚀
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🌟 Features
 
-A few resources to get you started if this is your first Flutter project:
+### ✅ Core Features (MVP)
+- 🏠 **Home Dashboard**: Trending, popular, and recommended movies  
+- 🎞️ **Movie Detail Screen**:
+  - Poster, title, overview, genres, rating, release date  
+  - ❤️ Add to Favorites  
+  - 🔄 Similar / recommended movies  
+- 📺 **Series Detail Screen**: Seasons & episodes info  
+- 🔍 **Search**: Movies & series with filters (genre, rating, year)  
+- ⭐ **Favorites / Watchlist**: Sync with Firebase  
+- 👤 **User Authentication**: Google Sign-in, Email/Password  
+- 📝 **Profile Management**: View account, favorites, logout  
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 🚀 Optional / Pro Features
+- 🗣️ Ratings & reviews from users  
+- 🤖 Personalized recommendation engine  
+- 📡 Offline caching of favorites and movie lists  
+- 🔔 Push notifications for trending movies or new seasons  
+- 🌗 Dark & Light mode support  
+- ✨ Smooth animations & UI polish  
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 🛠 Tech Stack
+
+- **Flutter** – front-end framework  
+- **Firebase** – backend: Firestore, Auth, Storage  
+- **TMDb API** – movie & series data  
+- **State Management** – Bloc / Riverpod  
+- **Caching** – Hive or SQLite  
+
+---
+
+## ⚡ Installation
+
+1. **Clone the repo**:
+```bash
+git clone https://github.com/YourUsername/cinemind.git
+cd cinemind
