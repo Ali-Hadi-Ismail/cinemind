@@ -19,14 +19,6 @@ Discover trending movies, explore TV series, save favorites, and get personalize
 - 👤 **User Authentication**: Google Sign-in, Email/Password  
 - 📝 **Profile Management**: View account, favorites, logout  
 
-### 🚀 Optional / Pro Features
-- 🗣️ Ratings & reviews from users  
-- 🤖 Personalized recommendation engine  
-- 📡 Offline caching of favorites and movie lists  
-- 🔔 Push notifications for trending movies or new seasons  
-- 🌗 Dark & Light mode support  
-- ✨ Smooth animations & UI polish  
-
 ---
 
 ## 🛠 Tech Stack
@@ -34,8 +26,7 @@ Discover trending movies, explore TV series, save favorites, and get personalize
 - **Flutter** – front-end framework  
 - **Firebase** – backend: Firestore, Auth, Storage  
 - **TMDb API** – movie & series data  
-- **State Management** – Bloc / Riverpod  
-- **Caching** – Hive or SQLite  
+- **State Management** – Bloc
 
 ---
 
