@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "562101504181",
+    "project_id": "cinemind-acb0c",
+    "storage_bucket": "cinemind-acb0c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:562101504181:android:480fb42169a4e1fad916fc",
+        "android_client_info": {
+          "package_name": "com.example.cinemind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4rwR1UQJZq58O7JZxnOjE495qfNlfkac"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
