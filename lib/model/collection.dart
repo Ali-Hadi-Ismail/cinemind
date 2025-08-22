@@ -11,6 +11,7 @@ class Collection {
     required this.backdropPath,
   });
 
+  // From JSON
   factory Collection.fromJson(Map<String, dynamic> json) {
     return Collection(
       id: json['id'] ?? 0,
@@ -18,5 +19,15 @@ class Collection {
       posterPath: json['poster_path'] ?? '',
       backdropPath: json['backdrop_path'] ?? '',
     );
+  }
+
+  // To JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'poster_path': posterPath,
+      'backdrop_path': backdropPath,
+    };
   }
 }

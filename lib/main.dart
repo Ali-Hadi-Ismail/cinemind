@@ -1,3 +1,5 @@
+import 'package:cinemind/module/onboarding/splash_screen.dart';
+import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -15,23 +17,10 @@ class CineMindApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const MyHomePage(),
+      themeMode: ThemeMode.dark, // Force dark mode
+      debugShowCheckedModeBanner: false,
+      darkTheme: CineMindTheme.darkTheme,
+      home: SplashScreen(),
     );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({
-    super.key,
-  });
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
   }
 }
