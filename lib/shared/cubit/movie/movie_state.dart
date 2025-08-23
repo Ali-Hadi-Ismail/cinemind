@@ -7,8 +7,15 @@ class MovieInitial extends MovieState {}
 class MovieLoading extends MovieState {}
 
 class MovieLoaded extends MovieState {
-  final List<Movie> movies;
-  MovieLoaded(this.movies);
+  final List<Movie> popular;
+  final List<Movie> topRated;
+  final List<Movie> upcoming;
+
+  MovieLoaded({
+    this.popular = const [],
+    this.topRated = const [],
+    this.upcoming = const [],
+  });
 }
 
 class MovieError extends MovieState {

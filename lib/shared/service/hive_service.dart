@@ -24,4 +24,11 @@ class HiveService {
   }
 
   int? getCacheTimestamp(String key) => box.get('${key}_timestamp');
+
+  bool isCacheValid(String key, Duration maxAge) {
+    final ts = getCacheTimestamp(key);
+    if (ts == null) return false;
+    final cachedAt = DateTime.fromMillisecondsSinceEpoch(ts);
+    return DateTime.now().difference(cachedAt) < maxAge;
+  }
 }
