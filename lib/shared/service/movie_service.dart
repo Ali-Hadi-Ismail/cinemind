@@ -95,4 +95,23 @@ class MovieService {
       return [];
     }
   }
+
+  Future<List<String>> fetchMovieImages(int movieId) async {
+    final uri = Uri.parse(
+        "https://api.themoviedb.org/3/movie/$movieId/images?api_key=$apiKey");
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      List<String> posters = (data['posters'] as List)
+          .map((item) => "https://image.tmdb.org/t/p/w500${item['file_path']}")
+          .toList();
+      List<String> backdrops = (data['backdrops'] as List)
+          .map((item) => "https://image.tmdb.org/t/p/w780${item['file_path']}")
+          .toList();
+      return [...posters, ...backdrops];
+    } else {
+      return [];
+    }
+  }
 }

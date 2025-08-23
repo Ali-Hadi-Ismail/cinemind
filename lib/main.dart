@@ -1,13 +1,21 @@
+import 'package:cinemind/layout/home_layout.dart';
 import 'package:cinemind/module/onboarding/splash_screen.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'package:hive_flutter/hive_flutter.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await dotenv.load(fileName: ".env");
+  await Hive.initFlutter(); // Initialize Hive
+
+  await Hive.openBox('movies'); // Open your box
+  //if I want to hide status bar and navigation bar
+  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const CineMindApp());
 }
 
@@ -20,7 +28,7 @@ class CineMindApp extends StatelessWidget {
       themeMode: ThemeMode.dark, // Force dark mode
       debugShowCheckedModeBanner: false,
       darkTheme: CineMindTheme.darkTheme,
-      home: SplashScreen(),
+      home: HomeLayout(),
     );
   }
 }

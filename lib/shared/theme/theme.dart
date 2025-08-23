@@ -28,8 +28,8 @@ class CineMindTheme {
     dividerColor: Colors.grey,
     colorScheme: ColorScheme.dark(
       primary: primaryRed,
-      background: backgroundBlack,
-      onBackground: whiteText,
+      surface: backgroundBlack,
+      onSurface: whiteText,
       onPrimary: whiteText,
     ),
   );
@@ -56,7 +56,7 @@ class CineMindTheme {
     dividerColor: Colors.grey,
     colorScheme: ColorScheme.light(
       primary: primaryRed,
-      background: Colors.white,
+      surface: Colors.white,
       onPrimary: Colors.white,
     ),
   );
