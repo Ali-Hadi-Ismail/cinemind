@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:cinemind/model/tv_serires.dart';
+import 'package:cinemind/model/tv_series.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../../model/actor.dart';
@@ -39,7 +39,7 @@ class SearchService {
     return [];
   }
 
-  Future<List<TvSeries>> fetchSearchTV({
+  Future<List<TvSerie>> fetchSearchTV({
     required String query,
     bool includeAdult = false,
     int page = 1,
@@ -58,7 +58,7 @@ class SearchService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return (data['results'] as List)
-            .map((tvJson) => TvSeries.fromJson(tvJson))
+            .map((tvJson) => TvSerie.fromJson(tvJson))
             .toList();
       }
     } catch (e) {
@@ -88,7 +88,7 @@ class SearchService {
             case 'movie':
               return Movie.fromJson(item);
             case 'tv':
-              return TvSeries.fromJson(item);
+              return TvSerie.fromJson(item);
             case 'person':
               return Person.fromJson(item);
             default:
@@ -125,7 +125,7 @@ class SearchService {
             case 'movie':
               return Movie.fromJson(item);
             case 'tv':
-              return TvSeries.fromJson(item);
+              return TvSerie.fromJson(item);
             case 'person':
               return Person.fromJson(item);
             default:

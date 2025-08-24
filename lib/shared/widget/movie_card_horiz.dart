@@ -6,7 +6,7 @@ import '../repo/movie_repo.dart';
 class MovieCard extends StatelessWidget {
   final Movie movie;
 
-  const MovieCard({required this.movie});
+  const MovieCard({super.key, required this.movie});
 
   @override
   Widget build(BuildContext context) {

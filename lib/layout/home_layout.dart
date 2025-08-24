@@ -90,7 +90,7 @@ class _HomeLayoutState extends State<HomeLayout> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _screens = [
+    final List<Widget> screens = [
       HomeScreen(),
       SearchScreen(),
       ImpulseScreen(),
@@ -99,7 +99,7 @@ class _HomeLayoutState extends State<HomeLayout> with TickerProviderStateMixin {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: SafeArea(
         child: Container(

@@ -1,7 +1,7 @@
 import 'season.dart';
 import 'production_company.dart';
 
-class TvSeries {
+class TvSerie {
   final bool adult;
   final String? backdropPath;
   final int id;
@@ -18,7 +18,7 @@ class TvSeries {
   final List<ProductionCompany> productionCompanies;
   final List<Season> seasons;
 
-  TvSeries({
+  TvSerie({
     required this.adult,
     this.backdropPath,
     required this.id,
@@ -36,7 +36,7 @@ class TvSeries {
     required this.seasons,
   });
 
-  factory TvSeries.fromJson(Map<String, dynamic> json) => TvSeries(
+  factory TvSerie.fromJson(Map<String, dynamic> json) => TvSerie(
         adult: json['adult'] ?? false,
         backdropPath: json['backdrop_path'],
         id: json['id'],

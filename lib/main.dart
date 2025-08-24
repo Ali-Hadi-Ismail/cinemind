@@ -1,5 +1,4 @@
 import 'package:cinemind/layout/home_layout.dart';
-import 'package:cinemind/module/onboarding/splash_screen.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ void main() async {
   await Firebase.initializeApp();
   await dotenv.load(fileName: ".env");
   await Hive.initFlutter(); // Initialize Hive
+  await Hive.openBox('tv_cache');
 
   await Hive.openBox('movies'); // Open your box
   //if I want to hide status bar and navigation bar
