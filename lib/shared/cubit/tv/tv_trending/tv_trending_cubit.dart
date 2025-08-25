@@ -8,8 +8,15 @@ class TvTrendingCubit extends Cubit<TvTrendingState> {
   TvTrendingCubit({required this.repo}) : super(const TvTrendingInitial());
 
   Future<void> fetchTrendingList() async {
+    // Don't fetch if we already have data
+    if (state is TvTrendingLoaded) return;
+
     try {
-      emit(const TvTrendingLoading());
+      // Don't emit loading if we're already loading
+      if (state is! TvTrendingLoading) {
+        emit(const TvTrendingLoading());
+      }
+
       final trendingList = await repo.getTrendingTvSeries();
 
       if (trendingList != null && trendingList.isNotEmpty) {

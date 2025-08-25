@@ -36,7 +36,7 @@ class _HomeLayoutState extends State<HomeLayout> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
+  Widget buildNavItem(IconData icon, String label, int index) {
     bool isSelected = _currentIndex == index;
     Color itemColor = index == 2
         ? (isSelected ? Colors.yellow : Colors.grey)
@@ -103,23 +103,18 @@ class _HomeLayoutState extends State<HomeLayout> with TickerProviderStateMixin {
       ),
       bottomNavigationBar: SafeArea(
         child: Container(
+          margin: EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.transparent,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 4,
-              ),
-            ],
           ),
           height: 60,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(Icons.home, "Home", 0),
-              _buildNavItem(Icons.search, "Search", 1),
-              _buildNavItem(Icons.bolt, "Impulse", 2),
-              _buildNavItem(Icons.person, "Profile", 3),
+              buildNavItem(Icons.home, "Home", 0),
+              buildNavItem(Icons.search, "Search", 1),
+              buildNavItem(Icons.bolt, "Impulse", 2),
+              buildNavItem(Icons.person, "Profile", 3),
             ],
           ),
         ),

@@ -37,6 +37,15 @@ flutter:
   assets:
     - asset/images/
     - .env
+  fonts:
+    - family: BebasNeue
+      fonts:
+        - asset: asset/fonts/BebasNeue-Regular.ttf
+    - family: Montserrat
+      fonts:
+        - asset: asset/fonts/Montserrat-Regular.ttf
+        - asset: asset/fonts/Montserrat-Bold.ttf
+          weight: 700
 flutter_icons:
   android: true
   ios: true

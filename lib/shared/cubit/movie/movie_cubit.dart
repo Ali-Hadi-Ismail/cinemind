@@ -10,7 +10,14 @@ class MovieCubit extends Cubit<MovieState> {
   MovieCubit(this.repo) : super(const MovieInitial());
 
   Future<void> fetchAllMovies() async {
-    emit(const MovieLoading());
+    // Don't fetch if we already have data
+    if (state is MovieLoaded) return;
+
+    // Don't emit loading if we're already loading
+    if (state is! MovieLoading) {
+      emit(const MovieLoading());
+    }
+
     try {
       final popular = await repo.getPopularMovies();
       final topRated = await repo.getTopRatedMovies();
