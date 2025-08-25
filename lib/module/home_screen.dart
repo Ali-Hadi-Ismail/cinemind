@@ -1,3 +1,4 @@
+import 'package:cinemind/module/detail/movie_detail_screen.dart';
 import 'package:cinemind/shared/cubit/movie/movie_cubit.dart';
 import 'package:cinemind/shared/cubit/movie/movie_state.dart';
 import 'package:cinemind/shared/repo/movie_repo.dart';
@@ -29,6 +30,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _gradientController;
   late final MovieCubit _movieCubit;
   late final TvTrendingCubit _tvTrendingCubit;
+  // Cache palettes per image url to avoid recomputation
+  final Map<String, List<Color>> _paletteCache = {};
+  String? _lastPaletteImage;
 
   @override
   void initState() {
@@ -74,11 +78,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _updateGradientFromImage(String imageUrl) async {
+    if (imageUrl.isEmpty) return;
+    // If we already generated a palette for this image, reuse it
+    if (_lastPaletteImage == imageUrl && _paletteCache.containsKey(imageUrl)) {
+      final colors = _paletteCache[imageUrl]!;
+      targetGradientStart = colors[0];
+      targetGradientEnd = colors[1];
+      _gradientController.reset();
+      _gradientController.forward();
+      return;
+    }
+
+    if (_paletteCache.containsKey(imageUrl)) {
+      final colors = _paletteCache[imageUrl]!;
+      targetGradientStart = colors[0];
+      targetGradientEnd = colors[1];
+      _lastPaletteImage = imageUrl;
+      _gradientController.reset();
+      _gradientController.forward();
+      return;
+    }
+
     try {
+      // Keep the sampled size and color count low for performance
       final PaletteGenerator paletteGenerator =
           await PaletteGenerator.fromImageProvider(
         NetworkImage(imageUrl),
-        maximumColorCount: 8,
+        maximumColorCount: 4,
+        size: const Size(200, 100),
       );
 
       Color newStartColor = paletteGenerator.vibrantColor?.color ??
@@ -89,14 +116,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           paletteGenerator.darkMutedColor?.color ??
           const Color(0xFF16213E);
 
-      // Make colors stronger and more vibrant
+      // Make colors slightly stronger
       newStartColor = Color.lerp(newStartColor, Colors.black, 0.1)!;
-      newEndColor = Color.lerp(newEndColor, Colors.black, 0.2)!;
+      newEndColor = Color.lerp(newEndColor, Colors.black, 0.15)!;
 
-      // Update target colors and animate
+      // Cache and apply
+      _paletteCache[imageUrl] = [newStartColor, newEndColor];
+      _lastPaletteImage = imageUrl;
       targetGradientStart = newStartColor;
       targetGradientEnd = newEndColor;
-
       _gradientController.reset();
       _gradientController.forward();
     } catch (e) {
@@ -131,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             child: Scaffold(
               backgroundColor: Colors.transparent,
-              appBar: CustomeAppBar(),
+              appBar: customeAppBar(),
               body: SafeArea(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  AppBar CustomeAppBar() {
+  AppBar customeAppBar() {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -224,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: AutoScrollingTvCards(
                   tvShows: state.trendingList,
                   autoScrollDuration:
-                      const Duration(seconds: 2), // 2 second auto-scroll
+                      const Duration(seconds: 5), // 5 second auto-scroll
                   onPageChanged: (index) {
                     // Only update gradient, don't fetch new data
                     if (index < state.trendingList.length) {
@@ -287,7 +315,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: movies.length,
-                  itemBuilder: (_, i) => MovieCard(movie: movies[i]),
+                  itemBuilder: (_, i) => GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  MovieDetailsScreen(movie: movies[i])));
+                    },
+                    child: MovieCard(
+                      movie: movies[i],
+                    ),
+                  ),
                 );
               } else if (state is MovieError) {
                 return Center(

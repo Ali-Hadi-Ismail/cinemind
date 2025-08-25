@@ -8,12 +8,12 @@ class AutoScrollingTvCards extends StatefulWidget {
   final Duration autoScrollDuration;
 
   const AutoScrollingTvCards({
-    Key? key,
+    super.key,
     required this.tvShows,
     this.onPageChanged,
     this.showIndicators = true,
     this.autoScrollDuration = const Duration(seconds: 3),
-  }) : super(key: key);
+  });
 
   @override
   State<AutoScrollingTvCards> createState() => _AutoScrollingTvCardsState();
