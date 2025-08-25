@@ -33,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
+    // Create cubits once and fetch data. Do not recreate them on rebuild.
     _movieCubit = MovieCubit(MovieRepository())..fetchAllMovies();
     _tvTrendingCubit = TvTrendingCubit(
       repo: TvRepo(
@@ -65,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _gradientController.dispose();
+    // Close cubits created in initState
     _movieCubit.close();
     _tvTrendingCubit.close();
     super.dispose();
@@ -105,14 +108,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (_) => _movieCubit,
-          lazy: false,
-        ),
-        BlocProvider(
-          create: (_) => _tvTrendingCubit,
-          lazy: false,
-        ),
+        BlocProvider.value(value: _movieCubit),
+        BlocProvider.value(value: _tvTrendingCubit),
       ],
       child: AnimatedBuilder(
         animation: _gradientController,

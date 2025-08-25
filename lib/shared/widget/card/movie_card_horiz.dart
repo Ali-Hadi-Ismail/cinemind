@@ -3,18 +3,32 @@ import 'package:flutter/material.dart';
 import '../../../model/movie.dart';
 import '../../repo/movie_repo.dart';
 
-class MovieCard extends StatelessWidget {
+class MovieCard extends StatefulWidget {
   final Movie movie;
 
   const MovieCard({super.key, required this.movie});
 
   @override
-  Widget build(BuildContext context) {
-    final movieRepo = MovieRepository(); // or inject via Bloc if needed
+  State<MovieCard> createState() => _MovieCardState();
+}
 
+class _MovieCardState extends State<MovieCard> {
+  late final MovieRepository _movieRepo;
+  late final Future<List<String>> _imagesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _movieRepo = MovieRepository(); // keep single instance per card
+    // Cache the future so rebuilds (animations/scroll) don't refetch
+    _imagesFuture = _movieRepo.getMovieImages(widget.movie.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: 120,
-      margin: EdgeInsets.only(right: 15),
+      margin: const EdgeInsets.only(right: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -22,21 +36,21 @@ class MovieCard extends StatelessWidget {
             height: 140,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Color(0xFF2A2A3E),
+              color: const Color(0xFF2A2A3E),
             ),
             child: Stack(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: FutureBuilder<List<String>>(
-                    future: movieRepo.getMovieImages(movie.id),
+                    future: _imagesFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
-                        return Center(child: Text("Error loading image"));
+                        return const Center(child: Text("Error loading image"));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(child: Text("No images found"));
+                        return const Center(child: Text("No images found"));
                       } else {
                         final firstImage = snapshot.data![0];
                         return Image.network(firstImage, fit: BoxFit.cover);
@@ -44,12 +58,13 @@ class MovieCard extends StatelessWidget {
                     },
                   ),
                 ),
-                if (movie.adult)
+                if (widget.movie.adult)
                   Positioned(
                     top: 8,
                     right: 8,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.6),
                         borderRadius: BorderRadius.circular(8),
@@ -57,11 +72,11 @@ class MovieCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.star, color: Colors.amber, size: 12),
-                          SizedBox(width: 2),
+                          const Icon(Icons.star, color: Colors.amber, size: 12),
+                          const SizedBox(width: 2),
                           Text(
-                            movie.adult.toString(),
-                            style: TextStyle(
+                            widget.movie.adult.toString(),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
@@ -74,10 +89,10 @@ class MovieCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            movie.title,
-            style: TextStyle(
+            widget.movie.title,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 13,
               fontWeight: FontWeight.w500,

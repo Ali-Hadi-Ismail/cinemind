@@ -9,6 +9,9 @@ class TvRepo {
   final TvSerieService service;
   final Box cacheBox;
 
+  // In-flight requests dedupe
+  final Map<String, Future<dynamic>> _inflight = {};
+
   TvRepo({required this.service, required this.cacheBox});
 
   // -------------------- Get TV Series by ID --------------------
@@ -126,6 +129,7 @@ class TvRepo {
   Future<List<TvSerie>?> getTrendingTvSeries() async {
     final key = 'trending_tv_series';
 
+    // Return cached list if present
     if (cacheBox.containsKey(key)) {
       final cached = cacheBox.get(key);
       if (cached is List) {
@@ -135,10 +139,21 @@ class TvRepo {
       }
     }
 
-    final list = await service.getTrendingTvSeries();
-    if (list != null && list.isNotEmpty) {
-      await cacheBox.put(key, list.map((e) => jsonEncode(e.toJson())).toList());
+    // Deduplicate in-flight fetches
+    if (_inflight.containsKey(key)) {
+      return await _inflight[key] as List<TvSerie>?;
     }
-    return list;
+
+    final fetchFuture = service.getTrendingTvSeries().then((list) async {
+      if (list != null && list.isNotEmpty) {
+        await cacheBox.put(
+            key, list.map((e) => jsonEncode(e.toJson())).toList());
+      }
+      _inflight.remove(key);
+      return list;
+    });
+
+    _inflight[key] = fetchFuture;
+    return await fetchFuture;
   }
 }

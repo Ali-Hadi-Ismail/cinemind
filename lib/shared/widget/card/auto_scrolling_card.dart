@@ -142,7 +142,7 @@ class _AutoScrollingTvCardsState extends State<AutoScrollingTvCards> {
                         children: [
                           // Background image
                           Image.network(
-                            'https://image.tmdb.org/t/p/w500${show.posterPath ?? show.backdropPath ?? ''}',
+                            'https://image.tmdb.org/t/p/w500${show.backdropPath ?? ''}',
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(

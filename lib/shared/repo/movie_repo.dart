@@ -7,6 +7,8 @@ class MovieRepository {
   final Box box = Hive.box('movies');
 
   static const cacheDuration = Duration(hours: 24);
+  // In-flight request cache to deduplicate concurrent calls
+  final Map<String, Future<dynamic>> _inflight = {};
 
   /// Generic function to get cached data or fetch fresh
   Future<List<Movie>> _getCachedMovies(
@@ -63,6 +65,11 @@ class MovieRepository {
     final key = 'images_$movieId';
     final cachedData = box.get(key) as Map?;
 
+    // If a fetch is already in-flight for this key, return the same future
+    if (_inflight.containsKey(key)) {
+      return await _inflight[key] as List<String>;
+    }
+
     if (cachedData != null) {
       final lastFetch =
           DateTime.fromMillisecondsSinceEpoch(cachedData['timestamp']);
@@ -71,23 +78,34 @@ class MovieRepository {
       final images = (cachedData['images'] as List).cast<String>();
 
       if (isExpired) {
-        service.fetchMovieImages(movieId).then((freshImages) {
-          box.put(key, {
-            'images': freshImages,
-            'timestamp': DateTime.now().millisecondsSinceEpoch,
+        // Refresh in background but don't block current return
+        if (!_inflight.containsKey(key)) {
+          _inflight[key] =
+              service.fetchMovieImages(movieId).then((freshImages) {
+            box.put(key, {
+              'images': freshImages,
+              'timestamp': DateTime.now().millisecondsSinceEpoch,
+            });
+            _inflight.remove(key);
+            return freshImages;
           });
-        });
+        }
       }
 
       return images;
     }
 
-    // No cache, fetch and save
-    final images = await service.fetchMovieImages(movieId);
-    box.put(key, {
-      'images': images,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    // No cache, fetch and save, but dedupe concurrent requests
+    final fetchFuture = service.fetchMovieImages(movieId).then((images) {
+      box.put(key, {
+        'images': images,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
+      _inflight.remove(key);
+      return images;
     });
-    return images;
+
+    _inflight[key] = fetchFuture;
+    return await fetchFuture;
   }
 }
