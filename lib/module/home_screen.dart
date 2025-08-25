@@ -133,15 +133,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               backgroundColor: Colors.transparent,
               appBar: CustomeAppBar(),
               body: SafeArea(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildTrendingTvSerie(),
-                      const SizedBox(height: 10),
-                      _buildMostPopularMovies(),
-                    ],
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildTrendingTvSerie(),
+                    _buildMostPopularMovies(),
+                  ],
                 ),
               ),
             ),
@@ -163,39 +161,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           // TODO: Navigate to profile / login
         },
         child: Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.grey.shade800,
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-        ),
+            padding: const EdgeInsets.only(left: 16.0),
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.grey.shade800,
+              child: ClipOval(
+                child: Image.asset(
+                  'asset/images/person.png',
+                  fit: BoxFit.cover,
+                  width: 60, // match diameter = radius * 2
+                  height: 40,
+                ),
+              ),
+            )),
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Text(
-            "Hello, Ali",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        children: [
+          Text("Hello, Ali", style: Theme.of(context).textTheme.bodyLarge),
           SizedBox(height: 4),
-          Text(
-            "\"Good morning, Vietnam!\"",
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
+          Text("\"Good morning, Vietnam!\"",
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium!
+                  .copyWith(fontSize: 16)),
         ],
       ),
       actions: [
@@ -239,11 +229,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     // Only update gradient, don't fetch new data
                     if (index < state.trendingList.length) {
                       final currentShow = state.trendingList[index];
-                      final imageUrl =
-                          currentShow.posterPath ?? currentShow.backdropPath;
+                      final imageUrl = currentShow.backdropPath;
                       if (imageUrl != null && imageUrl.isNotEmpty) {
                         _updateGradientFromImage(
-                            'https://image.tmdb.org/t/p/w500$imageUrl');
+                            'https://image.tmdb.org/t/p/w780$imageUrl');
                       }
                     }
                   },
