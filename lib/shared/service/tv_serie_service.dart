@@ -146,4 +146,29 @@ class TvSerieService {
       return null;
     }
   }
+
+  Future<List<TvSerie>?> getTrendingTvSeries({int page = 1}) async {
+    final query = {
+      'api_key': apiKey,
+      'language': 'en-US',
+      'page': '$page',
+    };
+    final endPoint = "/3/trending/tv/week";
+    final url = Uri.https('api.themoviedb.org', endPoint, query);
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return (data['results'] as List)
+            .map((e) => TvSerie.fromJson(e))
+            .toList();
+      } else {
+        throw Exception(
+            "Failed to fetch trending TV series: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error fetching trending TV series: $e");
+      return null;
+    }
+  }
 }

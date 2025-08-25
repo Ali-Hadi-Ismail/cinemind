@@ -122,4 +122,23 @@ class TvRepo {
     }
     return list;
   }
+
+  Future<List<TvSerie>?> getTrendingTvSeries() async {
+    final key = 'trending_tv_series';
+
+    if (cacheBox.containsKey(key)) {
+      final cached = cacheBox.get(key);
+      if (cached is List) {
+        return cached
+            .map((e) => TvSerie.fromJson(jsonDecode(e.toString())))
+            .toList();
+      }
+    }
+
+    final list = await service.getTrendingTvSeries();
+    if (list != null && list.isNotEmpty) {
+      await cacheBox.put(key, list.map((e) => jsonEncode(e.toJson())).toList());
+    }
+    return list;
+  }
 }

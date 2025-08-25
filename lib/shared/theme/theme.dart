@@ -3,17 +3,14 @@ import 'package:flutter/material.dart';
 class CineMindTheme {
   // Lighter red, soft black, white
   static const Color primaryRed = Color(0xFFE53935); // softer red
-  static const Color backgroundBlack = Color(0xFF1E1E1E); // softer black
+  static const Color backgroundBlack = Color(0xFF312c2b); // softer black
   static const Color whiteText = Colors.white;
 
   static ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
     primaryColor: primaryRed,
     scaffoldBackgroundColor: backgroundBlack,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: primaryRed,
-      foregroundColor: whiteText,
-    ),
+
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: primaryRed,
       foregroundColor: whiteText,

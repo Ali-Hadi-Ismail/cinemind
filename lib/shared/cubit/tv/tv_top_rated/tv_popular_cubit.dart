@@ -6,11 +6,11 @@ import 'tv_popular_state.dart';
 class TvPopularCubit extends Cubit<TvPopularState> {
   final TvRepo repo;
 
-  TvPopularCubit({required this.repo}) : super(TvPopularInitial());
+  TvPopularCubit({required this.repo}) : super(const TvPopularInitial());
 
   Future<void> fetchPopularList() async {
     try {
-      emit(TvPopularLoading()); // show loading state
+      emit(const TvPopularLoading());
       final popularList = await repo.getPopular();
 
       if (popularList != null && popularList.isNotEmpty) {

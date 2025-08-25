@@ -3,18 +3,24 @@ import 'package:cinemind/model/tv_series.dart';
 
 /// ---- STATES ---- ///
 abstract class TvPopularState extends Equatable {
+  const TvPopularState();
+
   @override
   List<Object?> get props => [];
 }
 
-class TvPopularInitial extends TvPopularState {}
+class TvPopularInitial extends TvPopularState {
+  const TvPopularInitial();
+}
 
-class TvPopularLoading extends TvPopularState {}
+class TvPopularLoading extends TvPopularState {
+  const TvPopularLoading();
+}
 
 class TvPopularLoaded extends TvPopularState {
   final List<TvSerie> popularList;
 
-  TvPopularLoaded({required this.popularList});
+  const TvPopularLoaded({required this.popularList});
 
   @override
   List<Object?> get props => [popularList];
@@ -23,7 +29,7 @@ class TvPopularLoaded extends TvPopularState {
 class TvPopularError extends TvPopularState {
   final String message;
 
-  TvPopularError({required this.message});
+  const TvPopularError({required this.message});
 
   @override
   List<Object?> get props => [message];

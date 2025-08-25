@@ -7,24 +7,14 @@ import '../../../model/movie.dart';
 class MovieCubit extends Cubit<MovieState> {
   final MovieRepository repo;
 
-  MovieCubit(this.repo) : super(MovieInitial()) {
-    fetchAllMovies(); // fetch all categories at once
-  }
+  MovieCubit(this.repo) : super(const MovieInitial());
 
   Future<void> fetchAllMovies() async {
-    emit(MovieLoading());
+    emit(const MovieLoading());
     try {
-      // Fetch all categories in parallel
-      final popularFuture = repo.getPopularMovies();
-      final topRatedFuture = repo.getTopRatedMovies();
-      final upcomingFuture = repo.getUpcomingMovies();
-
-      final results =
-          await Future.wait([popularFuture, topRatedFuture, upcomingFuture]);
-
-      final popular = results[0];
-      final topRated = results[1];
-      final upcoming = results[2];
+      final popular = await repo.getPopularMovies();
+      final topRated = await repo.getTopRatedMovies();
+      final upcoming = await repo.getUpcomingMovies();
 
       emit(MovieLoaded(
         popular: popular,
@@ -36,14 +26,13 @@ class MovieCubit extends Cubit<MovieState> {
     }
   }
 
-  /// Optional: Fetch only one category later if needed
   Future<void> fetchCategory(String category) async {
-    if (state is! MovieLoaded) return; // ensure we have base state
-
-    final currentState = state as MovieLoaded;
-    List<Movie> movies = [];
-
+    emit(const MovieLoading());
     try {
+      List<Movie> movies = [];
+      final currentState =
+          state is MovieLoaded ? state as MovieLoaded : const MovieLoaded();
+
       switch (category) {
         case "popular":
           movies = await repo.getPopularMovies();
@@ -57,6 +46,8 @@ class MovieCubit extends Cubit<MovieState> {
           movies = await repo.getUpcomingMovies();
           emit(currentState.copyWith(upcoming: movies));
           break;
+        default:
+          await fetchAllMovies();
       }
     } catch (e) {
       emit(MovieError("Failed to load $category: $e"));
