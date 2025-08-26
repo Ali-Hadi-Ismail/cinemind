@@ -82,364 +82,324 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     final movie = widget.movie;
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 400,
-            pinned: true,
-            backgroundColor: const Color(0xFF1A1A2E),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Background poster/backdrop image (use Image.network for loading/error handling)
-                  Positioned.fill(
-                    child: Image.network(
-                      _normalizeImageUrl(movie.backdropPath, backdrop: true)
-                              .isNotEmpty
-                          ? _normalizeImageUrl(movie.backdropPath,
-                              backdrop: true)
-                          : 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=500&h=600&fit=crop',
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return Container(color: Colors.grey[850]);
-                      },
-                      errorBuilder: (context, error, stack) {
-                        return Container(
-                          color: Colors.grey[850],
-                          child: const Center(
-                            child: Icon(Icons.broken_image,
-                                color: Colors.white24, size: 64),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  // Gradient overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          const Color(0xFF1A1A2E).withOpacity(0.7),
-                          const Color(0xFF1A1A2E),
-                        ],
-                        stops: const [0.0, 0.7, 1.0],
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 400,
+              pinned: true,
+              backgroundColor: const Color(0xFF1A1A2E),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+              flexibleSpace: FlexibleSpaceBar(
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Background poster/backdrop image (use Image.network for loading/error handling)
+                    Positioned.fill(
+                      child: Image.network(
+                        _normalizeImageUrl(movie.backdropPath, backdrop: true)
+                                .isNotEmpty
+                            ? _normalizeImageUrl(movie.backdropPath,
+                                backdrop: true)
+                            : 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=500&h=600&fit=crop',
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return Container(color: Colors.grey[850]);
+                        },
+                        errorBuilder: (context, error, stack) {
+                          return Container(
+                            color: Colors.grey[850],
+                            child: const Center(
+                              child: Icon(Icons.broken_image,
+                                  color: Colors.white24, size: 64),
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  ),
-                  // Movie poster and title
-                  Positioned(
-                    bottom: 80,
-                    left: 20,
-                    right: 20,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        // Movie poster
-                        Container(
-                          width: 120,
-                          height: 180,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.5),
-                                blurRadius: 10,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              _normalizeImageUrl(movie.posterPath).isNotEmpty
-                                  ? _normalizeImageUrl(movie.posterPath)
-                                  : 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=300&h=450&fit=crop',
-                              fit: BoxFit.cover,
-                              loadingBuilder: (context, child, progress) {
-                                if (progress == null) return child;
-                                return Container(color: Colors.grey[800]);
-                              },
-                              errorBuilder: (context, error, stack) {
-                                return Container(
-                                  color: Colors.grey[800],
-                                  child: const Center(
-                                    child: Icon(Icons.broken_image,
-                                        color: Colors.white54, size: 40),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
+                    // Gradient overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            const Color(0xFF1A1A2E).withOpacity(0.7),
+                            const Color(0xFF1A1A2E),
+                          ],
+                          stops: const [0.0, 0.7, 1.0],
                         ),
-                        const SizedBox(width: 20),
-                        // Movie info
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                movie.title,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 4,
-                                children: [
-                                  _buildInfoChip(_getYear(movie.releaseDate)),
-                                  _buildInfoChip(_formatRuntime(movie.runtime)),
-                                  if (movie.genres.isNotEmpty)
-                                    _buildInfoChip(movie.genres.first.name),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Like button near the title area
-                        IconButton(
-                          onPressed: () {
-                            setState(() => _liked = !_liked);
-                          },
-                          iconSize: 36,
-                          icon: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 400),
-                            transitionBuilder: (child, anim) =>
-                                ScaleTransition(scale: anim, child: child),
-                            child: _liked
-                                ? Icon(Icons.favorite,
-                                    key: const ValueKey('liked'),
-                                    color: Colors.redAccent)
-                                : Icon(Icons.favorite_border,
-                                    key: const ValueKey('unliked'),
-                                    color: Colors.white),
-                          ),
-                        ).animate(onPlay: (controller) {
-                          /* no-op: animated via AnimatedSwitcher */
-                        }),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image gallery (thumbnails) similar to TMDb
-                  FutureBuilder<List<String>>(
-                    future: _imagesFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const SizedBox(
-                          height: 120,
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      // Repo now returns full URLs already. Still normalize in case.
-                      final raw = snapshot.data!
-                          .map((p) => _normalizeImageUrl(p))
-                          .where((p) => p.isNotEmpty)
-                          .toList();
-
-                      // Deduplicate while preserving order
-                      final images = <String>[];
-                      final seen = <String>{};
-                      for (var u in raw) {
-                        if (seen.add(u)) images.add(u);
-                      }
-
-                      if (images.isEmpty) return const SizedBox.shrink();
-
-                      const int maxVisible = 6;
-                      final visible = images.take(maxVisible).toList();
-                      final hasMore = images.length > maxVisible;
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    // Movie poster and title
+                    Positioned(
+                      bottom: 80,
+                      left: 20,
+                      right: 20,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          const Text(
-                            'Photos',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          // Movie poster
+                          Container(
+                            width: 120,
+                            height: 180,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.5),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 120,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.only(right: 8),
-                              itemCount: visible.length + (hasMore ? 1 : 0),
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(width: 8),
-                              itemBuilder: (context, i) {
-                                if (i >= visible.length && hasMore) {
-                                  // 'See all' tile
-                                  return GestureDetector(
-                                    onTap: () => _openGallery(images, 0),
-                                    child: Container(
-                                      width: 110,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[900],
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: const [
-                                            Icon(Icons.photo_library,
-                                                color: Colors.white70),
-                                            SizedBox(height: 6),
-                                            Text('See all',
-                                                style: TextStyle(
-                                                    color: Colors.white70)),
-                                          ],
-                                        ),
-                                      ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                _normalizeImageUrl(movie.posterPath).isNotEmpty
+                                    ? _normalizeImageUrl(movie.posterPath)
+                                    : 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=300&h=450&fit=crop',
+                                fit: BoxFit.cover,
+                                loadingBuilder: (context, child, progress) {
+                                  if (progress == null) return child;
+                                  return Container(color: Colors.grey[800]);
+                                },
+                                errorBuilder: (context, error, stack) {
+                                  return Container(
+                                    color: Colors.grey[800],
+                                    child: const Center(
+                                      child: Icon(Icons.broken_image,
+                                          color: Colors.white54, size: 40),
                                     ),
                                   );
-                                }
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          // Movie info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  movie.title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: [
+                                    _buildInfoChip(_getYear(movie.releaseDate)),
+                                    _buildInfoChip(
+                                        _formatRuntime(movie.runtime)),
+                                    if (movie.genres.isNotEmpty)
+                                      _buildInfoChip(movie.genres.first.name),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Like button near the title area
+                          IconButton(
+                            onPressed: () {
+                              setState(() => _liked = !_liked);
+                            },
+                            iconSize: 36,
+                            icon: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 400),
+                              transitionBuilder: (child, anim) =>
+                                  ScaleTransition(scale: anim, child: child),
+                              child: _liked
+                                  ? Icon(Icons.favorite,
+                                      key: const ValueKey('liked'),
+                                      color: Colors.redAccent)
+                                  : Icon(Icons.favorite_border,
+                                      key: const ValueKey('unliked'),
+                                      color: Colors.white),
+                            ),
+                          ).animate(onPlay: (controller) {
+                            /* no-op: animated via AnimatedSwitcher */
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Image gallery (thumbnails) similar to TMDb
+                    FutureBuilder<List<String>>(
+                      future: _imagesFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox(
+                            height: 120,
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
 
-                                final url = visible[i];
-                                // Determine approximate orientation from TMDb size token
-                                final isLandscape = url.contains('/w300') ||
-                                    url.contains('/w780') ||
-                                    url.contains('/w300');
-                                final width = isLandscape ? 140.0 : 90.0;
-                                final height = isLandscape ? 86.0 : 140.0;
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
 
-                                return GestureDetector(
-                                  onTap: () => _openGallery(images, i),
-                                  child: Container(
-                                    width: width,
-                                    height: height,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.grey[800],
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        url,
-                                        fit: BoxFit.cover,
-                                        width: width,
-                                        height: height,
-                                        loadingBuilder: (c, child, p) {
-                                          if (p == null) return child;
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        },
-                                        errorBuilder: (c, e, s) => Container(
-                                          color: Colors.grey[850],
-                                          child: const Center(
-                                            child: Icon(Icons.broken_image,
-                                                color: Colors.white24),
+                        // Repo now returns full URLs already. Still normalize in case.
+                        final raw = snapshot.data!
+                            .map((p) => _normalizeImageUrl(p))
+                            .where((p) => p.isNotEmpty)
+                            .toList();
+
+                        // Deduplicate while preserving order
+                        final images = <String>[];
+                        final seen = <String>{};
+                        for (var u in raw) {
+                          if (seen.add(u)) images.add(u);
+                        }
+
+                        if (images.isEmpty) return const SizedBox.shrink();
+
+                        const int maxVisible = 6;
+                        final visible = images.take(maxVisible).toList();
+                        final hasMore = images.length > maxVisible;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Photos',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 120,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.only(right: 8),
+                                itemCount: visible.length + (hasMore ? 1 : 0),
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(width: 8),
+                                itemBuilder: (context, i) {
+                                  if (i >= visible.length && hasMore) {
+                                    // 'See all' tile
+                                    return GestureDetector(
+                                      onTap: () => _openGallery(images, 0),
+                                      child: Container(
+                                        width: 110,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[900],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Center(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: const [
+                                              Icon(Icons.photo_library,
+                                                  color: Colors.white70),
+                                              SizedBox(height: 6),
+                                              Text('See all',
+                                                  style: TextStyle(
+                                                      color: Colors.white70)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  final url = visible[i];
+                                  // Determine approximate orientation from TMDb size token
+                                  final isLandscape = url.contains('/w300') ||
+                                      url.contains('/w780') ||
+                                      url.contains('/w300');
+                                  final width = isLandscape ? 140.0 : 90.0;
+                                  final height = isLandscape ? 86.0 : 140.0;
+
+                                  return GestureDetector(
+                                    onTap: () => _openGallery(images, i),
+                                    child: Container(
+                                      width: width,
+                                      height: height,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: Colors.grey[800],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          url,
+                                          fit: BoxFit.cover,
+                                          width: width,
+                                          height: height,
+                                          loadingBuilder: (c, child, p) {
+                                            if (p == null) return child;
+                                            return const Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          },
+                                          errorBuilder: (c, e, s) => Container(
+                                            color: Colors.grey[850],
+                                            child: const Center(
+                                              child: Icon(Icons.broken_image,
+                                                  color: Colors.white24),
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
+                            const SizedBox(height: 20),
+                          ],
+                        );
+                      },
+                    ),
+
+                    // Tagline (if available)
+                    if (movie.tagline.isNotEmpty) ...[
+                      Center(
+                        child: Text(
+                          movie.tagline,
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w500,
                           ),
-                          const SizedBox(height: 20),
-                        ],
-                      );
-                    },
-                  ),
-
-                  // Tagline (if available)
-                  if (movie.tagline.isNotEmpty) ...[
-                    Center(
-                      child: Text(
-                        movie.tagline,
-                        style: const TextStyle(
-                          color: Colors.orange,
-                          fontSize: 16,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.w500,
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+                      const SizedBox(height: 20),
+                    ],
 
-                  // Story Line section
-                  const Text(
-                    'Story Line',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    movie.overview,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                      height: 1.6,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-
-                  // Movie Details
-                  const Text(
-                    'Details',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildDetailRow('Release Date', movie.releaseDate),
-                  _buildDetailRow('Runtime', '${movie.runtime} minutes'),
-                  _buildDetailRow('Original Language',
-                      movie.originalLanguage.toUpperCase()),
-                  if (movie.budget > 0)
-                    _buildDetailRow(
-                        'Budget', '\$${_formatCurrency(movie.budget)}'),
-                  if (movie.revenue > 0)
-                    _buildDetailRow(
-                        'Revenue', '\$${_formatCurrency(movie.revenue)}'),
-
-                  const SizedBox(height: 30),
-
-                  // Genres
-                  if (movie.genres.isNotEmpty) ...[
+                    // Story Line section
                     const Text(
-                      'Genres',
+                      'Story Line',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -447,20 +407,19 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: movie.genres
-                          .map((genre) => _buildGenreChip(genre.name))
-                          .toList(),
+                    Text(
+                      movie.overview,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                        height: 1.6,
+                      ),
                     ),
                     const SizedBox(height: 30),
-                  ],
 
-                  // Production Companies
-                  if (movie.productionCompanies.isNotEmpty) ...[
+                    // Movie Details
                     const Text(
-                      'Production Companies',
+                      'Details',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -468,25 +427,71 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    ...movie.productionCompanies.map(
-                      (company) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          company.name,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
+                    _buildDetailRow('Release Date', movie.releaseDate),
+                    _buildDetailRow('Runtime', '${movie.runtime} minutes'),
+                    _buildDetailRow('Original Language',
+                        movie.originalLanguage.toUpperCase()),
+                    if (movie.budget > 0)
+                      _buildDetailRow(
+                          'Budget', '\$${_formatCurrency(movie.budget)}'),
+                    if (movie.revenue > 0)
+                      _buildDetailRow(
+                          'Revenue', '\$${_formatCurrency(movie.revenue)}'),
+
+                    const SizedBox(height: 30),
+
+                    // Genres
+                    if (movie.genres.isNotEmpty) ...[
+                      const Text(
+                        'Genres',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: movie.genres
+                            .map((genre) => _buildGenreChip(genre.name))
+                            .toList(),
+                      ),
+                      const SizedBox(height: 30),
+                    ],
+
+                    // Production Companies
+                    if (movie.productionCompanies.isNotEmpty) ...[
+                      const Text(
+                        'Production Companies',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ...movie.productionCompanies.map(
+                        (company) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            company.name,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 20),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -20,15 +20,18 @@ class MovieLoaded extends MovieState {
   final List<Movie> popular;
   final List<Movie> topRated;
   final List<Movie> upcoming;
-
+  final Movie? detailedMovie;
   const MovieLoaded({
+    this.detailedMovie = null,
     this.popular = const [],
     this.topRated = const [],
     this.upcoming = const [],
   });
 
   @override
-  List<Object?> get props => [popular, topRated, upcoming];
+  // Include detailedMovie so state changes when detail is loaded
+  @override
+  List<Object?> get props => [popular, topRated, upcoming, detailedMovie];
 
   MovieLoaded copyWith({
     List<Movie>? popular,
@@ -45,7 +48,7 @@ class MovieLoaded extends MovieState {
 
 class MovieError extends MovieState {
   final String message;
-  
+
   const MovieError(this.message);
 
   @override

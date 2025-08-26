@@ -1,4 +1,5 @@
 import 'package:cinemind/module/detail/movie_detail_screen.dart';
+import 'package:cinemind/model/movie.dart';
 import 'package:cinemind/shared/cubit/movie/movie_cubit.dart';
 import 'package:cinemind/shared/cubit/movie/movie_state.dart';
 import 'package:cinemind/shared/repo/movie_repo.dart';
@@ -239,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           builder: (context, state) {
             if (state is TvTrendingLoading) {
               return const SizedBox(
-                height: 240, // Increased height
+                height: 240,
                 child: Center(
                     child: CircularProgressIndicator(
                   color: Color(0xFF00D4FF),
@@ -248,13 +249,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             } else if (state is TvTrendingLoaded) {
               if (state.trendingList.isEmpty) return const SizedBox.shrink();
               return SizedBox(
-                height: 240, // Increased height from 200 to 240
+                height: 240,
                 child: AutoScrollingTvCards(
                   tvShows: state.trendingList,
-                  autoScrollDuration:
-                      const Duration(seconds: 5), // 5 second auto-scroll
+                  autoScrollDuration: const Duration(seconds: 5),
                   onPageChanged: (index) {
-                    // Only update gradient, don't fetch new data
                     if (index < state.trendingList.length) {
                       final currentShow = state.trendingList[index];
                       final imageUrl = currentShow.backdropPath;
@@ -264,12 +263,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       }
                     }
                   },
-                  showIndicators: false, // Hide dot indicators
+                  showIndicators: false,
                 ),
               );
             } else if (state is TvTrendingError) {
               return SizedBox(
-                height: 240, // Increased height
+                height: 240,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -296,6 +295,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _sectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.headlineMedium),
+          GestureDetector(
+            onTap: () {
+              // Add navigation to see all screen
+            },
+            child:
+                Text("See All", style: Theme.of(context).textTheme.bodyMedium),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMostPopularMovies() {
     return Column(
       children: [
@@ -303,6 +321,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         SizedBox(
           height: 180,
           child: BlocBuilder<MovieCubit, MovieState>(
+            buildWhen: (previous, current) {
+              // Prevent transient MovieLoading from clearing existing MovieLoaded UI
+              if (current is MovieLoading && previous is MovieLoaded)
+                return false;
+              return true;
+            },
             builder: (context, state) {
               if (state is MovieLoading) {
                 return const Center(
@@ -316,12 +340,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: movies.length,
                   itemBuilder: (_, i) => GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      Movie movie;
+                      try {
+                        movie = await context
+                            .read<MovieCubit>()
+                            .fetchMovieById(movies[i].id);
+                      } catch (_) {
+                        // If detail fetch fails, fall back to the list item so navigation still works
+                        movie = movies[i];
+                      }
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  MovieDetailsScreen(movie: movies[i])));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              MovieDetailsScreen(movie: movie),
+                        ),
+                      );
                     },
                     child: MovieCard(
                       movie: movies[i],
@@ -352,25 +387,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _sectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.headlineMedium),
-          GestureDetector(
-            onTap: () {
-              // Add navigation to see all screen
-            },
-            child:
-                Text("See All", style: Theme.of(context).textTheme.bodyMedium),
-          ),
-        ],
-      ),
     );
   }
 }
