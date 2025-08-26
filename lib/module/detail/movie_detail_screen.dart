@@ -8,9 +8,9 @@ class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
 
   const MovieDetailsScreen({
-    Key? key,
+    super.key,
     required this.movie,
-  }) : super(key: key);
+  });
 
   @override
   State<MovieDetailsScreen> createState() => _MovieDetailsScreenState();
@@ -222,12 +222,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               duration: const Duration(milliseconds: 400),
                               transitionBuilder: (child, anim) =>
                                   ScaleTransition(scale: anim, child: child),
+                              // Use a ValueKey tied to the boolean so the new child is
+                              // always a distinct keyed widget when _liked changes.
                               child: _liked
                                   ? Icon(Icons.favorite,
-                                      key: const ValueKey('liked'),
+                                      key: ValueKey<bool>(_liked),
                                       color: Colors.redAccent)
                                   : Icon(Icons.favorite_border,
-                                      key: const ValueKey('unliked'),
+                                      key: ValueKey<bool>(_liked),
                                       color: Colors.white),
                             ),
                           ).animate(onPlay: (controller) {

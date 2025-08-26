@@ -29,7 +29,7 @@ class Person {
     this.imdbId,
   });
 
-  // Optional: factory to parse from JSON
+  // Factory constructor to parse from JSON
   factory Person.fromJson(Map<String, dynamic> json) {
     return Person(
       id: json['id'],
@@ -48,5 +48,24 @@ class Person {
       homepage: json['homepage'],
       imdbId: json['imdb_id'],
     );
+  }
+
+  // Converts the object back to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'biography': biography,
+      'birthday': birthday,
+      'deathday': deathday,
+      'gender': gender,
+      'known_for_department': knownForDepartment,
+      'also_known_as': alsoKnownAs,
+      'place_of_birth': placeOfBirth,
+      'profile_path': profilePath,
+      'adult': adult,
+      'homepage': homepage,
+      'imdb_id': imdbId,
+    };
   }
 }

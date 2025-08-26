@@ -323,8 +323,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: BlocBuilder<MovieCubit, MovieState>(
             buildWhen: (previous, current) {
               // Prevent transient MovieLoading from clearing existing MovieLoaded UI
-              if (current is MovieLoading && previous is MovieLoaded)
+              if (current is MovieLoading && previous is MovieLoaded) {
                 return false;
+              }
               return true;
             },
             builder: (context, state) {
@@ -358,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       );
                     },
-                    child: MovieCard(
+                    child: MovieCardPoster(
                       movie: movies[i],
                     ),
                   ),

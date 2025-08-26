@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import '../../../model/movie.dart';
 import '../../repo/movie_repo.dart';
 
-class MovieCard extends StatefulWidget {
+class MovieCardPoster extends StatefulWidget {
   final Movie movie;
 
-  const MovieCard({super.key, required this.movie});
+  const MovieCardPoster({super.key, required this.movie});
 
   @override
-  State<MovieCard> createState() => _MovieCardState();
+  State<MovieCardPoster> createState() => _MovieCardPosterState();
 }
 
-class _MovieCardState extends State<MovieCard> {
+class _MovieCardPosterState extends State<MovieCardPoster> {
   late final MovieRepository _movieRepo;
   late final Future<List<String>> _imagesFuture;
 

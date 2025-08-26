@@ -22,7 +22,7 @@ class MovieLoaded extends MovieState {
   final List<Movie> upcoming;
   final Movie? detailedMovie;
   const MovieLoaded({
-    this.detailedMovie = null,
+    this.detailedMovie,
     this.popular = const [],
     this.topRated = const [],
     this.upcoming = const [],

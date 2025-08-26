@@ -12,7 +12,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await Hive.initFlutter(); // Initialize Hive
   await Hive.openBox('tv_cache');
-
+  await Hive.openBox('search');
   await Hive.openBox('movies'); // Open your box
   //if I want to hide status bar and navigation bar
   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
