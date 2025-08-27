@@ -7,153 +7,130 @@ import '../service/tv_serie_service.dart';
 
 class TvRepo {
   final TvSerieService service;
-  final Box cacheBox;
+  final Box cacheBox = Hive.box('tv_cache');
 
-  // In-flight requests dedupe
   final Map<String, Future<dynamic>> _inflight = {};
 
-  TvRepo({required this.service, required this.cacheBox});
+  TvRepo({
+    required this.service,
+  });
 
-  // -------------------- Get TV Series by ID --------------------
+  // -------------------- TV Series by ID --------------------
   Future<TvSerie?> getTvSeries(int id) async {
     final key = 'series_$id';
 
-    // 1️⃣ Check cache
     if (cacheBox.containsKey(key)) {
       final cached = cacheBox.get(key);
-      return TvSerie.fromJson(jsonDecode(cached));
+      return TvSerie.fromJson(jsonDecode(cached as String));
     }
 
-    // 2️⃣ Fetch from API
-    final series = await service.fetchTvSerieByID(id);
+    final series = await _dedupedFetch(key, () => service.fetchTvSerieByID(id));
     if (series != null) {
       cacheBox.put(key, jsonEncode(series.toJson()));
     }
     return series;
   }
 
-  // -------------------- Get Season --------------------
+  // -------------------- Season --------------------
   Future<Season?> getSeason(int seriesId, int seasonNumber) async {
     final key = 'season_${seriesId}_$seasonNumber';
-
     if (cacheBox.containsKey(key)) {
       final cached = cacheBox.get(key);
-      return Season.fromJson(jsonDecode(cached));
+      return Season.fromJson(jsonDecode(cached as String));
     }
 
-    final season = await service.fetchTvSerieSeason(seriesId, seasonNumber);
+    final season = await _dedupedFetch(
+        key, () => service.fetchTvSerieSeason(seriesId, seasonNumber));
     if (season != null) {
       cacheBox.put(key, jsonEncode(season.toJson()));
     }
     return season;
   }
 
-  // -------------------- Get Episode --------------------
+  // -------------------- Episode --------------------
   Future<Episode?> getEpisode(
       int seriesId, int seasonNumber, int episodeNumber) async {
     final key = 'episode_${seriesId}_${seasonNumber}_$episodeNumber';
-
     if (cacheBox.containsKey(key)) {
       final cached = cacheBox.get(key);
-      return Episode.fromJson(jsonDecode(cached));
+      return Episode.fromJson(jsonDecode(cached as String));
     }
 
-    final episode =
-        await service.fetchEpisode(seriesId, seasonNumber, episodeNumber);
+    final episode = await _dedupedFetch(
+        key, () => service.fetchEpisode(seriesId, seasonNumber, episodeNumber));
     if (episode != null) {
       cacheBox.put(key, jsonEncode(episode.toJson()));
     }
     return episode;
   }
 
-  // -------------------- Get Popular List --------------------
-  Future<List<TvSerie>?> getPopular({int page = 1}) async {
-    final key = 'popular_page_$page';
+  // -------------------- Lists --------------------
+  Future<List<TvSerie>?> getPopular({int page = 1}) => _getList(
+      'popular_page_$page', () => service.getPopularTvSeries(page: page));
 
+  Future<List<TvSerie>?> getTopRated({int page = 1}) => _getList(
+      'toprated_page_$page', () => service.getTopRatedTvSeries(page: page));
+
+  Future<List<TvSerie>?> getOnTheAir({int page = 1}) => _getList(
+      'onair_page_$page', () => service.getOnTheAirTvSeries(page: page));
+
+  Future<List<TvSerie>?> getTrendingTvSeries() =>
+      _getList('trending_tv_series', () => service.getTrendingTvSeries());
+
+  // -------------------- Helpers --------------------
+  Future<T> _dedupedFetch<T>(String key, Future<T> Function() fetcher) async {
+    if (_inflight.containsKey(key)) return await _inflight[key] as T;
+    final future = fetcher().whenComplete(() => _inflight.remove(key));
+    _inflight[key] = future;
+    return await future;
+  }
+
+  Future<List<TvSerie>?> _getList(
+      String key, Future<List<TvSerie>?> Function() fetcher) async {
     if (cacheBox.containsKey(key)) {
       final cached = cacheBox.get(key);
       if (cached is List) {
         return cached
-            .map((e) => TvSerie.fromJson(jsonDecode(e.toString())))
+            .map((e) => TvSerie.fromJson(jsonDecode(e as String)))
             .toList();
       }
     }
 
-    final list = await service.getPopularTvSeries(page: page);
+    final list = await _dedupedFetch(key, fetcher);
     if (list != null && list.isNotEmpty) {
-      await cacheBox.put(key, list.map((e) => jsonEncode(e.toJson())).toList());
+      cacheBox.put(key, list.map((e) => jsonEncode(e.toJson())).toList());
     }
     return list;
   }
 
-  // -------------------- Get Top Rated List --------------------
-  Future<List<TvSerie>?> getTopRated({int page = 1}) async {
-    final key = 'toprated_page_$page';
+  final Map<String, Future<List<String>?>> _inflightImages = {};
+  Future<List<String>> getTvImages(int seriesId) async {
+    final key = 'images_$seriesId';
 
+    // 1️⃣ Check cache
     if (cacheBox.containsKey(key)) {
       final cached = cacheBox.get(key);
       if (cached is List) {
-        return cached
-            .map((e) => TvSerie.fromJson(jsonDecode(e.toString())))
-            .toList();
+        return cached.map((e) => e.toString()).toList();
       }
     }
 
-    final list = await service.getTopRatedTvSeries(page: page);
-    if (list != null && list.isNotEmpty) {
-      await cacheBox.put(key, list.map((e) => jsonEncode(e.toJson())).toList());
+    // 2️⃣ Deduplicate in-flight fetches
+    if (_inflightImages.containsKey(key)) {
+      return await _inflightImages[key] ?? [];
     }
-    return list;
-  }
 
-  // -------------------- Get On Air List --------------------
-  Future<List<TvSerie>?> getOnTheAir({int page = 1}) async {
-    final key = 'onair_page_$page';
-
-    if (cacheBox.containsKey(key)) {
-      final cached = cacheBox.get(key);
-      if (cached is List) {
-        return cached
-            .map((e) => TvSerie.fromJson(jsonDecode(e.toString())))
-            .toList();
+    // 3️⃣ Fetch from API
+    final fetchFuture = service.fetchTvImages(seriesId).then((list) async {
+      final images = list ?? [];
+      if (images.isNotEmpty) {
+        await cacheBox.put(key, images); // save list of strings directly
       }
-    }
-
-    final list = await service.getOnTheAirTvSeries(page: page);
-    if (list != null && list.isNotEmpty) {
-      await cacheBox.put(key, list.map((e) => jsonEncode(e.toJson())).toList());
-    }
-    return list;
-  }
-
-  Future<List<TvSerie>?> getTrendingTvSeries() async {
-    final key = 'trending_tv_series';
-
-    // Return cached list if present
-    if (cacheBox.containsKey(key)) {
-      final cached = cacheBox.get(key);
-      if (cached is List) {
-        return cached
-            .map((e) => TvSerie.fromJson(jsonDecode(e.toString())))
-            .toList();
-      }
-    }
-
-    // Deduplicate in-flight fetches
-    if (_inflight.containsKey(key)) {
-      return await _inflight[key] as List<TvSerie>?;
-    }
-
-    final fetchFuture = service.getTrendingTvSeries().then((list) async {
-      if (list != null && list.isNotEmpty) {
-        await cacheBox.put(
-            key, list.map((e) => jsonEncode(e.toJson())).toList());
-      }
-      _inflight.remove(key);
-      return list;
+      _inflightImages.remove(key);
+      return images;
     });
 
-    _inflight[key] = fetchFuture;
+    _inflightImages[key] = fetchFuture;
     return await fetchFuture;
   }
 }

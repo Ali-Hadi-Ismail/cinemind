@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../../model/movie.dart';
-import '../../service/movie_service.dart';
+import '../../theme/theme.dart';
 import '../../utils/image_helper.dart';
 
 class MovieCard extends StatelessWidget {
@@ -14,6 +15,7 @@ class MovieCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // Movie Poster
           ClipRRect(
@@ -40,9 +42,9 @@ class MovieCard extends StatelessWidget {
                 return Container(
                   width: 100,
                   height: 150,
-                  color: Colors.grey[200],
+                  color: CineMindTheme.cardDark.withOpacity(0.5),
                   child: const Center(
-                    child: CircularProgressIndicator(),
+                    child: SpinKitHourGlass(color: CineMindTheme.primaryRed),
                   ),
                 );
               },
@@ -55,6 +57,7 @@ class MovieCard extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // Movie Title
                 Text(
@@ -89,38 +92,18 @@ class MovieCard extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 8),
-
-                // Runtime
                 Row(
-                  children: [
-                    const Icon(Icons.timer, size: 16, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        movie.runtime != null && movie.runtime! > 0
-                            ? "${movie.runtime} Minutes"
-                            : "Runtime unknown",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                // Genre
-                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Icon(Icons.movie, size: 16, color: Colors.grey),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        movie.genres.isNotEmpty
-                            ? movie.genres[0].name
-                            : "Unknown",
+                        movie.overview.isNotEmpty
+                            ? movie.overview
+                            : "No description available.",
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.grey,

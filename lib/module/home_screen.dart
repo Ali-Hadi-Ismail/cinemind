@@ -44,7 +44,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _tvTrendingCubit = TvTrendingCubit(
       repo: TvRepo(
         service: TvSerieService(),
-        cacheBox: Hive.box('tv_cache'),
       ),
     )..fetchTrendingList();
 
@@ -186,9 +185,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       toolbarHeight: 80,
       centerTitle: false,
       leading: GestureDetector(
-        onTap: () {
-          // TODO: Navigate to profile / login
-        },
+        onTap: () {},
         child: Padding(
             padding: const EdgeInsets.only(left: 16.0),
             child: CircleAvatar(
@@ -219,9 +216,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       actions: [
         IconButton(
-          onPressed: () {
-            // TODO: Navigate to wishlist
-          },
+          onPressed: () {},
           icon: const Icon(Icons.favorite),
           color: Colors.red,
           iconSize: 28,
@@ -349,6 +344,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             .fetchMovieById(movies[i].id);
                       } catch (_) {
                         // If detail fetch fails, fall back to the list item so navigation still works
+                        print(
+                            'Error fetching movie details for id ${movies[i].id}');
                         movie = movies[i];
                       }
                       Navigator.push(

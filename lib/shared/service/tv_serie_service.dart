@@ -24,6 +24,37 @@ class TvSerieService {
     }
   }
 
+  Future<List<String>?> fetchTvImages(int seriesId) async {
+    final url = Uri.parse('$baseUrl/tv/$seriesId/images?api_key=$apiKey');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // TMDb returns "backdrops" and "posters"
+        final backdrops = (data['backdrops'] as List)
+            .map((e) => e['file_path'] as String)
+            .toList();
+
+        final posters = (data['posters'] as List)
+            .map((e) => e['file_path'] as String)
+            .toList();
+
+        // Merge lists (optional: remove duplicates)
+        final images = [...backdrops, ...posters];
+        return images.toSet().toList();
+      } else {
+        print('Failed to fetch images: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching TV images: $e');
+      return null;
+    }
+  }
+
   Future<Season?> fetchTvSerieSeason(int serieId, int seasonNumber) async {
     try {
 /*       final String seasonUrl =
@@ -169,6 +200,45 @@ class TvSerieService {
     } catch (e) {
       print("Error fetching trending TV series: $e");
       return null;
+    }
+  }
+
+  Future<List<TvSerie>> fetchSearchTV({
+    required String query,
+    int page = 1,
+    int? firstAirDateYear,
+    bool includeAdult = false,
+    String language = 'en-US',
+  }) async {
+    final params = <String, String>{
+      'api_key': apiKey,
+      'query': query,
+      'page': page.toString(),
+      'language': language,
+      'include_adult': includeAdult.toString(),
+    };
+    if (firstAirDateYear != null) {
+      params['first_air_date_year'] = firstAirDateYear.toString();
+    }
+
+    final url = Uri.https('api.themoviedb.org', '/3/search/tv', params);
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final results = data['results'] as List? ?? [];
+        return results
+            .map((e) => TvSerie.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      } else {
+        // return empty list instead of null
+        print('fetchSearchTV status: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('fetchSearchTV error: $e');
+      return [];
     }
   }
 }
