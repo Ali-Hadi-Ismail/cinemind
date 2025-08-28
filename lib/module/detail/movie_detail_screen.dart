@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../model/movie.dart';
-import '../../shared/repo/movie_repo.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
@@ -17,13 +16,11 @@ class MovieDetailsScreen extends StatefulWidget {
 }
 
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
-  late final MovieRepository _movieRepo;
   bool _liked = false;
 
   @override
   void initState() {
     super.initState();
-    _movieRepo = MovieRepository();
   }
 
   String _normalizeImageUrl(String path, {bool backdrop = false}) {
@@ -210,13 +207,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
                       const SizedBox(height: 20),
                     ],
-                    const Text(
+                    Text(
                       'Story Line',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -228,13 +221,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 30),
-                    const Text(
+                    Text(
                       'Details',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 16),
                     _buildDetailRow('Release Date', movie.releaseDate),

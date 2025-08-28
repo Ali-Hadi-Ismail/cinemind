@@ -21,7 +21,6 @@ class TvSerieCard extends StatelessWidget {
       color: Colors.white,
     );
     final metaStyle = const TextStyle(fontSize: 14, color: Colors.grey);
-    final overviewStyle = const TextStyle(fontSize: 13, color: Colors.white70);
 
     return Container(
       height: 150, // <-- important: fixed height bounds the Row/Expanded
@@ -90,7 +89,7 @@ class TvSerieCard extends StatelessWidget {
                   Row(children: [
                     const Icon(Icons.language, size: 16, color: Colors.grey),
                     const SizedBox(width: 8),
-                    Text("${tvSerie.originalLanguage}", style: metaStyle),
+                    Text(tvSerie.originalLanguage, style: metaStyle),
                   ]),
                 ],
               ),
@@ -110,8 +109,9 @@ class TvSerieCard extends StatelessWidget {
       );
 
   String _formatAirDates(String first, String? last) {
-    if ((first.isEmpty || first == 'null') && (last == null || last.isEmpty))
+    if ((first.isEmpty || first == 'null') && (last == null || last.isEmpty)) {
       return 'Unknown';
+    }
     if (first.isEmpty || first == 'null') return last ?? 'Unknown';
     if (last == null || last.isEmpty || last == 'null') return first;
     return '$first → $last';

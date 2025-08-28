@@ -2,8 +2,8 @@
 import 'dart:async';
 import 'package:cinemind/shared/cubit/search/movie/search_movie_cubit.dart';
 import 'package:cinemind/shared/cubit/search/movie/search_movie_state.dart';
-import 'package:cinemind/shared/cubit/search/tv/search_tvSerie_cubit.dart';
-import 'package:cinemind/shared/cubit/search/tv/search_tvSerie_state.dart';
+import 'package:cinemind/shared/cubit/search/tv/search_tv_serie_cubit.dart';
+import 'package:cinemind/shared/cubit/search/tv/search_tv_serie_state.dart';
 import 'package:cinemind/shared/service/movie_service.dart';
 import 'package:cinemind/shared/service/search_service.dart';
 import 'package:cinemind/shared/repo/search_repo.dart';

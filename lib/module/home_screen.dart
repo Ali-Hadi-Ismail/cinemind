@@ -6,6 +6,7 @@ import 'package:cinemind/shared/repo/movie_repo.dart';
 import 'package:cinemind/shared/repo/tv_repo.dart';
 import 'package:cinemind/shared/service/tv_serie_service.dart';
 import 'package:cinemind/shared/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -133,6 +134,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  User? user = FirebaseAuth.instance.currentUser;
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -192,21 +195,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: CircleAvatar(
               radius: 20,
               backgroundColor: Colors.grey.shade800,
-              child: ClipOval(
-                child: Image.asset(
-                  'asset/images/person.png',
-                  fit: BoxFit.cover,
-                  width: 60, // match diameter = radius * 2
-                  height: 40,
-                ),
-              ),
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.network(
+                    user!.photoURL!,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  )),
             )),
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Hello, Ali", style: Theme.of(context).textTheme.bodyLarge),
+          Text("Hello ${user?.displayName}",
+              style: Theme.of(context).textTheme.bodyLarge),
           SizedBox(height: 4),
           Text("\"Good morning, Vietnam!\"",
               style: Theme.of(context)
@@ -236,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           buildWhen: (previous, current) => previous != current,
           builder: (context, state) {
             if (state is TvTrendingLoading) {
-              return Container(
+              return SizedBox(
                 height: 240,
                 child: Center(
                     child: SpinKitHourGlass(
@@ -339,22 +343,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   itemCount: movies.length,
                   itemBuilder: (_, i) => GestureDetector(
                     onTap: () async {
-                      Movie movie;
+                      // Show loading indicator while fetching movie details
+                      showDialog(
+                        context: context,
+                        builder: (context) => const Center(
+                          child: SpinKitHourGlass(
+                            color: CineMindTheme.primaryRed,
+                          ),
+                        ),
+                      );
+                      Movie? movie;
                       try {
                         movie = await context
                             .read<MovieCubit>()
-                            .fetchMovieById(movies[i].id);
+                            .fetchMovieByIdFromAPI(movies[i].id);
                       } catch (e) {
                         // If detail fetch fails, fall back to the list item so navigation still works
                         print(
                             'Error fetching movie details for id ${movies[i].id}  error is : $e');
                         movie = movies[i];
                       }
+                      Navigator.of(context, rootNavigator: true).pop();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              MovieDetailsScreen(movie: movie),
+                              MovieDetailsScreen(movie: movie!),
                         ),
                       );
                     },

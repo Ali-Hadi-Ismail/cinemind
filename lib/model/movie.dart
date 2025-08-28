@@ -1,4 +1,3 @@
-import 'collection.dart';
 import 'gener.dart';
 import 'production_company.dart';
 

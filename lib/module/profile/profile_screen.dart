@@ -1,12 +1,17 @@
+import 'package:cinemind/shared/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-import '../../shared/theme/theme.dart';
+import '../../shared/provider/auth_provider.dart';
+import '../authentication/login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -31,32 +36,38 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(50),
-                      child: Image.asset(
-                        'asset/images/person.png', // ✅ corrected path
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                      ),
+                      child: user?.photoURL != null
+                          ? Image.network(
+                              user!.photoURL!,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              'asset/images/person.png',
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text("Ali Ismail",
+                        children: [
+                          Text(user?.displayName ?? "User Name",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               )),
                           SizedBox(height: 3),
-                          Text("ismailovich1904@gmail.com",
+                          Text(user?.email ?? "No Email Found Amigo",
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 14)),
                         ],
                       ),
                     ),
-                    const Icon(Icons.edit, color: CineMindTheme.primaryRed),
                   ],
                 ),
               ),
@@ -85,7 +96,37 @@ class ProfileScreen extends StatelessWidget {
               _buildListTile(Icons.help, "Help & Support"),
               _buildListTile(Icons.info, "About"),
               _buildListTile(Icons.star, "Rate Us"),
-              _buildListTile(Icons.logout, "Logout"),
+              _buildListTile(Icons.logout, "Logout", function: () async {
+                // Show loading dialog
+                showDialog(
+                  context: context,
+                  barrierDismissible:
+                      false, // prevent closing by tapping outside
+                  builder: (context) => const Center(
+                    child: SpinKitHourGlass(
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                );
+
+                try {
+                  await AuthProviderCustome.signOut();
+
+                  // Close the loading dialog
+                  Navigator.pop(context);
+
+                  // Navigate to login
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                } catch (e) {
+                  Navigator.pop(context); // close the loading dialog if error
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Logout failed: $e')),
+                  );
+                }
+              }),
             ],
           ),
         ),
@@ -93,20 +134,24 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  static Widget _buildListTile(IconData icon, String title) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white24, width: 1.0),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: CineMindTheme.primaryRed),
-        title: Text(title,
-            style: const TextStyle(color: Colors.white, fontSize: 14)),
-        trailing:
-            const Icon(Icons.chevron_right, color: CineMindTheme.primaryRed),
+  static Widget _buildListTile(IconData icon, String title,
+      {dynamic function}) {
+    return GestureDetector(
+      onTap: function,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white24, width: 1.0),
+        ),
+        child: ListTile(
+          leading: Icon(icon, color: CineMindTheme.primaryRed),
+          title: Text(title,
+              style: const TextStyle(color: Colors.white, fontSize: 14)),
+          trailing:
+              const Icon(Icons.chevron_right, color: CineMindTheme.primaryRed),
+        ),
       ),
     );
   }

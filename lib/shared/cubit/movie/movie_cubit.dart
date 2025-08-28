@@ -3,6 +3,7 @@ import 'package:cinemind/shared/repo/movie_repo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../model/movie.dart';
+import '../../service/movie_service.dart';
 
 class MovieCubit extends Cubit<MovieState> {
   final MovieRepository repo;
@@ -37,6 +38,36 @@ class MovieCubit extends Cubit<MovieState> {
     // Fetch details without emitting a global loading state so UI lists remain visible
     try {
       final movie = await repo.getMovieById(id);
+      final currentState =
+          state is MovieLoaded ? state as MovieLoaded : const MovieLoaded();
+
+      // Emit merged state with detailedMovie while preserving lists
+      emit(MovieLoaded(
+        detailedMovie: movie,
+        popular: currentState.popular,
+        topRated: currentState.topRated,
+        upcoming: currentState.upcoming,
+      ));
+      return movie;
+    } catch (e) {
+      // Preserve existing lists on error and emit MovieError separately
+      final currentState = state is MovieLoaded ? state as MovieLoaded : null;
+      if (currentState != null) {
+        // re-emit existing loaded state so UI doesn't disappear
+        emit(currentState);
+      } else {
+        emit(MovieError("Failed to load movie details: $e"));
+      }
+      rethrow;
+    }
+  }
+
+//fetch movie directly from api
+
+  Future<Movie?> fetchMovieByIdFromAPI(int id) async {
+    // Fetch details without emitting a global loading state so UI lists remain visible
+    try {
+      final movie = await MovieService().fetchMovieById(id);
       final currentState =
           state is MovieLoaded ? state as MovieLoaded : const MovieLoaded();
 

@@ -1,7 +1,7 @@
 import 'package:cinemind/shared/repo/search_repo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../model/tv_series.dart';
-import 'search_tvSerie_state.dart';
+import 'search_tv_serie_state.dart';
 
 class SearchTvCubit extends Cubit<SearchTvState> {
   final SearchRepo repo;

@@ -201,7 +201,7 @@ class TvSerieService {
 
         final results = (data['results'] as List?)
             ?.map((e) => TvSerie.fromJson(e))
-            ?.toList();
+            .toList();
         print('🎬 Parsed TV series count: ${results?.length ?? 0}');
         return results;
       } else {

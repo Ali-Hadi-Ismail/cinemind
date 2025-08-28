@@ -26,9 +26,7 @@ class TvTrendingCubit extends Cubit<TvTrendingState> {
       if (trendingList != null && trendingList.isNotEmpty) {
         final newState = TvTrendingLoaded(trendingList: trendingList);
         emit(newState);
-        if (state is TvTrendingLoaded) {
-          final currentState = state as TvTrendingLoaded;
-        }
+        if (state is TvTrendingLoaded) {}
       } else {
         emit(const TvTrendingError(message: "No trending TV series found."));
       }

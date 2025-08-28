@@ -109,6 +109,30 @@ class MovieService {
     }
   }
 
+  Future<String?> getMovieTrailer(int movieId) async {
+    final url = Uri.parse(
+      'https://api.themoviedb.org/3/movie/$movieId/videos?language=en-US&api_key=$apiKey',
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = data['results'] as List<dynamic>;
+
+      // Look for a YouTube trailer
+      final trailer = results.firstWhere(
+        (video) => video['site'] == 'YouTube' && video['type'] == 'Trailer',
+        orElse: () => null,
+      );
+
+      if (trailer != null) {
+        return trailer['key']; // This is the YouTube video key
+      }
+    }
+    return null; // No trailer found
+  }
+
   Future<List<String>> fetchMovieImages(int movieId) async {
     final uri = Uri.parse(
         "https://api.themoviedb.org/3/movie/$movieId/images?api_key=$apiKey");

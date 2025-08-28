@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../model/tv_series.dart';
 import '../../shared/repo/tv_repo.dart';

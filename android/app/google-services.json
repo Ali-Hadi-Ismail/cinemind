@@ -12,7 +12,20 @@
           "package_name": "com.example.cinemind"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "562101504181-l4a4bejit7eb7a2s5erp5754t0mbnge1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.cinemind",
+            "certificate_hash": "013df573e2af2d181c69ded296499c9f3b053392"
+          }
+        },
+        {
+          "client_id": "562101504181-ppkujm9rltcpct40n5pte85eflnmvjud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB4rwR1UQJZq58O7JZxnOjE495qfNlfkac"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "562101504181-ppkujm9rltcpct40n5pte85eflnmvjud.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
