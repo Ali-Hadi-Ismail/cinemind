@@ -27,40 +27,34 @@ void main() async {
   runApp(const CineMindApp());
 }
 
-class CineMindApp extends StatefulWidget {
+class CineMindApp extends StatelessWidget {
   const CineMindApp({super.key});
-
-  @override
-  State<CineMindApp> createState() => _CineMindAppState();
-}
-
-class _CineMindAppState extends State<CineMindApp> {
-  void _checkUserLoggedIn() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // User is already logged in, navigate to home
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeLayout()),
-        );
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _checkUserLoggedIn();
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      themeMode: ThemeMode.dark, // Force dark mode
+      themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
       darkTheme: CineMindTheme.darkTheme,
-      home: LoginScreen(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // Loading state while Firebase checks user
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          // User is logged in
+          if (snapshot.hasData) {
+            return const HomeLayout();
+          }
+
+          // User not logged in
+          return const LoginScreen();
+        },
+      ),
     );
   }
 }
