@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../../model/movie.dart';
 import '../../repo/movie_repo.dart';
+import '../../theme/theme.dart';
 
 class MovieCardPoster extends StatefulWidget {
   final Movie movie;
@@ -46,7 +48,9 @@ class _MovieCardPosterState extends State<MovieCardPoster> {
                     future: _imagesFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(
+                            child: SpinKitHourGlass(
+                                color: CineMindTheme.primaryRed));
                       } else if (snapshot.hasError) {
                         return const Center(child: Text("Error loading image"));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

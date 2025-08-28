@@ -18,63 +18,20 @@ class MovieDetailsScreen extends StatefulWidget {
 
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   late final MovieRepository _movieRepo;
-  late final Future<List<String>> _imagesFuture;
   bool _liked = false;
 
   @override
   void initState() {
     super.initState();
     _movieRepo = MovieRepository();
-    _imagesFuture = _movieRepo.getMovieImages(widget.movie.id);
   }
 
   String _normalizeImageUrl(String path, {bool backdrop = false}) {
     if (path.isEmpty) return '';
     if (path.startsWith('http')) return path;
-    // Use TMDb recommended sizes
     return backdrop
         ? 'https://image.tmdb.org/t/p/w780$path'
         : 'https://image.tmdb.org/t/p/w342$path';
-  }
-
-  void _openGallery(List<String> images, int initialIndex) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            color: Colors.black,
-            child: SafeArea(
-              child: PageView.builder(
-                controller: PageController(initialPage: initialIndex),
-                itemCount: images.length,
-                itemBuilder: (context, index) {
-                  final url = images[index];
-                  return InteractiveViewer(
-                    child: Center(
-                      child: Image.network(
-                        url,
-                        fit: BoxFit.contain,
-                        loadingBuilder: (context, child, progress) {
-                          if (progress == null) return child;
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        },
-                        errorBuilder: (context, error, stack) => const Center(
-                          child: Icon(Icons.broken_image,
-                              color: Colors.white70, size: 64),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -97,7 +54,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Background poster/backdrop image (use Image.network for loading/error handling)
                     Positioned.fill(
                       child: Image.network(
                         _normalizeImageUrl(movie.backdropPath, backdrop: true)
@@ -121,7 +77,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         },
                       ),
                     ),
-                    // Gradient overlay
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -136,7 +91,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         ),
                       ),
                     ),
-                    // Movie poster and title
                     Positioned(
                       bottom: 80,
                       left: 20,
@@ -144,7 +98,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          // Movie poster
                           Container(
                             width: 120,
                             height: 180,
@@ -182,7 +135,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             ),
                           ),
                           const SizedBox(width: 20),
-                          // Movie info
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +164,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               ],
                             ),
                           ),
-                          // Like button near the title area
                           IconButton(
                             onPressed: () {
                               setState(() => _liked = !_liked);
@@ -222,8 +173,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               duration: const Duration(milliseconds: 400),
                               transitionBuilder: (child, anim) =>
                                   ScaleTransition(scale: anim, child: child),
-                              // Use a ValueKey tied to the boolean so the new child is
-                              // always a distinct keyed widget when _liked changes.
                               child: _liked
                                   ? Icon(Icons.favorite,
                                       key: ValueKey<bool>(_liked),
@@ -232,9 +181,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                       key: ValueKey<bool>(_liked),
                                       color: Colors.white),
                             ),
-                          ).animate(onPlay: (controller) {
-                            /* no-op: animated via AnimatedSwitcher */
-                          }),
+                          ).animate(onPlay: (controller) {}),
                         ],
                       ),
                     ),
@@ -248,141 +195,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Image gallery (thumbnails) similar to TMDb
-                    FutureBuilder<List<String>>(
-                      future: _imagesFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const SizedBox(
-                            height: 120,
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-
-                        // Repo now returns full URLs already. Still normalize in case.
-                        final raw = snapshot.data!
-                            .map((p) => _normalizeImageUrl(p))
-                            .where((p) => p.isNotEmpty)
-                            .toList();
-
-                        // Deduplicate while preserving order
-                        final images = <String>[];
-                        final seen = <String>{};
-                        for (var u in raw) {
-                          if (seen.add(u)) images.add(u);
-                        }
-
-                        if (images.isEmpty) return const SizedBox.shrink();
-
-                        const int maxVisible = 6;
-                        final visible = images.take(maxVisible).toList();
-                        final hasMore = images.length > maxVisible;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Photos',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              height: 120,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.only(right: 8),
-                                itemCount: visible.length + (hasMore ? 1 : 0),
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(width: 8),
-                                itemBuilder: (context, i) {
-                                  if (i >= visible.length && hasMore) {
-                                    // 'See all' tile
-                                    return GestureDetector(
-                                      onTap: () => _openGallery(images, 0),
-                                      child: Container(
-                                        width: 110,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[900],
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Center(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: const [
-                                              Icon(Icons.photo_library,
-                                                  color: Colors.white70),
-                                              SizedBox(height: 6),
-                                              Text('See all',
-                                                  style: TextStyle(
-                                                      color: Colors.white70)),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-
-                                  final url = visible[i];
-                                  // Determine approximate orientation from TMDb size token
-                                  final isLandscape = url.contains('/w300') ||
-                                      url.contains('/w780') ||
-                                      url.contains('/w300');
-                                  final width = isLandscape ? 140.0 : 90.0;
-                                  final height = isLandscape ? 86.0 : 140.0;
-
-                                  return GestureDetector(
-                                    onTap: () => _openGallery(images, i),
-                                    child: Container(
-                                      width: width,
-                                      height: height,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        color: Colors.grey[800],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          url,
-                                          fit: BoxFit.cover,
-                                          width: width,
-                                          height: height,
-                                          loadingBuilder: (c, child, p) {
-                                            if (p == null) return child;
-                                            return const Center(
-                                                child:
-                                                    CircularProgressIndicator());
-                                          },
-                                          errorBuilder: (c, e, s) => Container(
-                                            color: Colors.grey[850],
-                                            child: const Center(
-                                              child: Icon(Icons.broken_image,
-                                                  color: Colors.white24),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        );
-                      },
-                    ),
-
-                    // Tagline (if available)
                     if (movie.tagline.isNotEmpty) ...[
                       Center(
                         child: Text(
@@ -398,8 +210,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
                       const SizedBox(height: 20),
                     ],
-
-                    // Story Line section
                     const Text(
                       'Story Line',
                       style: TextStyle(
@@ -418,8 +228,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 30),
-
-                    // Movie Details
                     const Text(
                       'Details',
                       style: TextStyle(
@@ -439,10 +247,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     if (movie.revenue > 0)
                       _buildDetailRow(
                           'Revenue', '\$${_formatCurrency(movie.revenue)}'),
-
                     const SizedBox(height: 30),
-
-                    // Genres
                     if (movie.genres.isNotEmpty) ...[
                       const Text(
                         'Genres',
@@ -462,8 +267,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
                       const SizedBox(height: 30),
                     ],
-
-                    // Production Companies
                     if (movie.productionCompanies.isNotEmpty) ...[
                       const Text(
                         'Production Companies',

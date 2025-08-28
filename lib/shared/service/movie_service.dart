@@ -13,7 +13,20 @@ class MovieService {
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
-        return Movie.fromJson(jsonDecode(response.body));
+        // Decode once
+        final decoded = jsonDecode(response.body);
+
+        // 🔎 Debug logs
+        print("➡️ fetchMovieById($id)");
+        print("decoded runtimeType: ${decoded.runtimeType}");
+        if (decoded is Map) {
+          print(
+              "decoded keys types: ${decoded.keys.map((k) => k.runtimeType).toSet()}");
+        }
+
+        // ✅ Safe conversion to Map<String, dynamic>
+        final safeMap = Map<String, dynamic>.from(decoded);
+        return Movie.fromJson(safeMap);
       } else {
         print("Failed to fetch movie. Status code: ${response.statusCode}");
         return null;

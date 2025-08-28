@@ -25,7 +25,7 @@ class TvSerieService {
   }
 
   Future<List<String>?> fetchTvImages(int seriesId) async {
-    final url = Uri.parse('$baseUrl/tv/$seriesId/images?api_key=$apiKey');
+    final url = Uri.parse('$baseUrl$seriesId/images?api_key=$apiKey');
 
     try {
       final response = await http.get(url);
@@ -186,19 +186,32 @@ class TvSerieService {
     };
     final endPoint = "/3/trending/tv/week";
     final url = Uri.https('api.themoviedb.org', endPoint, query);
+
+    print('🔄 Fetching trending TV series...');
+    print('📡 URL: $url');
+
     try {
       final response = await http.get(url);
+      print('📊 Response status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return (data['results'] as List)
-            .map((e) => TvSerie.fromJson(e))
-            .toList();
+        print('✅ Response data keys: ${data.keys}');
+        print('📺 Results count: ${(data['results'] as List?)?.length ?? 0}');
+
+        final results = (data['results'] as List?)
+            ?.map((e) => TvSerie.fromJson(e))
+            ?.toList();
+        print('🎬 Parsed TV series count: ${results?.length ?? 0}');
+        return results;
       } else {
+        print('❌ HTTP Error: ${response.statusCode}');
+        print('❌ Response body: ${response.body}');
         throw Exception(
             "Failed to fetch trending TV series: ${response.statusCode}");
       }
     } catch (e) {
-      print("Error fetching trending TV series: $e");
+      print("💥 Error fetching trending TV series: $e");
       return null;
     }
   }

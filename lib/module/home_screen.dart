@@ -5,9 +5,10 @@ import 'package:cinemind/shared/cubit/movie/movie_state.dart';
 import 'package:cinemind/shared/repo/movie_repo.dart';
 import 'package:cinemind/shared/repo/tv_repo.dart';
 import 'package:cinemind/shared/service/tv_serie_service.dart';
+import 'package:cinemind/shared/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 import '../shared/cubit/tv/tv_trending/tv_trending_cubit.dart';
@@ -232,13 +233,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _sectionHeader("Trending TV Shows"),
         const SizedBox(height: 10),
         BlocBuilder<TvTrendingCubit, TvTrendingState>(
+          buildWhen: (previous, current) => previous != current,
           builder: (context, state) {
             if (state is TvTrendingLoading) {
-              return const SizedBox(
+              return Container(
                 height: 240,
                 child: Center(
-                    child: CircularProgressIndicator(
-                  color: Color(0xFF00D4FF),
+                    child: SpinKitHourGlass(
+                  color: CineMindTheme.primaryRed,
                 )),
               );
             } else if (state is TvTrendingLoaded) {
@@ -326,8 +328,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             builder: (context, state) {
               if (state is MovieLoading) {
                 return const Center(
-                    child: CircularProgressIndicator(
-                  color: Color(0xFF00D4FF),
+                    child: SpinKitHourGlass(
+                  color: CineMindTheme.primaryRed,
                 ));
               } else if (state is MovieLoaded) {
                 final movies = state.popular;
@@ -342,10 +344,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         movie = await context
                             .read<MovieCubit>()
                             .fetchMovieById(movies[i].id);
-                      } catch (_) {
+                      } catch (e) {
                         // If detail fetch fails, fall back to the list item so navigation still works
                         print(
-                            'Error fetching movie details for id ${movies[i].id}');
+                            'Error fetching movie details for id ${movies[i].id}  error is : $e');
                         movie = movies[i];
                       }
                       Navigator.push(

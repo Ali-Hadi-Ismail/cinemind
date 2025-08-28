@@ -1,3 +1,5 @@
+// Replace your entire TvRepo class with this debug version to find the issue:
+
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:cinemind/model/tv_series.dart';
@@ -74,15 +76,28 @@ class TvRepo {
   Future<List<TvSerie>?> getOnTheAir({int page = 1}) => _getList(
       'onair_page_$page', () => service.getOnTheAirTvSeries(page: page));
 
-  Future<List<TvSerie>?> getTrendingTvSeries() =>
-      _getList('trending_tv_series', () => service.getTrendingTvSeries());
+  Future<List<TvSerie>?> getTrendingTvSeries() {
+    print('🗄️ Repo: getTrendingTvSeries() called');
+    return _getList('trending_tv_series', () {
+      print('🗄️ Repo: Lambda function called - about to call service');
+      return service.getTrendingTvSeries();
+    });
+  }
 
   // -------------------- Helpers --------------------
   Future<T> _dedupedFetch<T>(String key, Future<T> Function() fetcher) async {
-    if (_inflight.containsKey(key)) return await _inflight[key] as T;
-    final future = fetcher().whenComplete(() => _inflight.remove(key));
+    if (_inflight.containsKey(key)) {
+      final result = await _inflight[key] as T;
+      return result;
+    }
+
+    final future = fetcher().whenComplete(() {
+      _inflight.remove(key);
+    });
+
     _inflight[key] = future;
-    return await future;
+    final result = await future;
+    return result;
   }
 
   Future<List<TvSerie>?> _getList(
@@ -90,16 +105,29 @@ class TvRepo {
     if (cacheBox.containsKey(key)) {
       final cached = cacheBox.get(key);
       if (cached is List) {
-        return cached
-            .map((e) => TvSerie.fromJson(jsonDecode(e as String)))
-            .toList();
+        try {
+          final result = cached.map((e) {
+            // Don't print every item to avoid spam
+            return TvSerie.fromJson(jsonDecode(e as String));
+          }).toList();
+          return result;
+        } catch (e) {
+          await cacheBox.delete(key);
+        }
       }
     }
 
     final list = await _dedupedFetch(key, fetcher);
+
     if (list != null && list.isNotEmpty) {
-      cacheBox.put(key, list.map((e) => jsonEncode(e.toJson())).toList());
+      try {
+        final cacheData = list.map((e) => jsonEncode(e.toJson())).toList();
+        await cacheBox.put(key, cacheData);
+      } catch (e) {
+        print('❌ Repo: Error caching data: $e');
+      }
     }
+
     return list;
   }
 

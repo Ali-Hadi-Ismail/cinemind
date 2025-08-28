@@ -19,7 +19,6 @@ class Movie {
   final String homepage;
   final bool hasVideo;
 
-  final Collection? belongsToCollection;
   final List<ProductionCompany> productionCompanies;
   final List<Genre> genres;
 
@@ -39,7 +38,6 @@ class Movie {
     required this.tagline,
     required this.homepage,
     required this.hasVideo,
-    this.belongsToCollection,
     required this.productionCompanies,
     required this.genres,
   });
@@ -62,9 +60,6 @@ class Movie {
       tagline: json['tagline'] ?? '',
       homepage: json['homepage'] ?? '',
       hasVideo: json['video'] as bool,
-      belongsToCollection: json['belongs_to_collection'] != null
-          ? Collection.fromJson(json['belongs_to_collection'])
-          : null,
       productionCompanies: (json['production_companies'] as List<dynamic>?)
               ?.map((e) => ProductionCompany.fromJson(e))
               .toList() ??
@@ -94,7 +89,6 @@ class Movie {
       'tagline': tagline,
       'homepage': homepage,
       'video': hasVideo,
-      'belongs_to_collection': belongsToCollection?.toJson(),
       'production_companies':
           productionCompanies.map((e) => e.toJson()).toList(),
       'genres': genres.map((e) => e.toJson()).toList(),
