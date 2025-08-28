@@ -4,6 +4,7 @@ import 'package:cinemind/shared/cubit/movie/movie_cubit.dart';
 import 'package:cinemind/shared/cubit/movie/movie_state.dart';
 import 'package:cinemind/shared/repo/movie_repo.dart';
 import 'package:cinemind/shared/repo/tv_repo.dart';
+import 'package:cinemind/shared/service/notification_service.dart';
 import 'package:cinemind/shared/service/tv_serie_service.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -196,11 +197,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               radius: 20,
               backgroundColor: Colors.grey.shade800,
               child: ClipRRect(
-                  borderRadius: BorderRadius.circular(50),
+                  borderRadius: BorderRadius.circular(70),
                   child: Image.network(
                     user!.photoURL!,
-                    width: 60,
-                    height: 60,
+                    width: 70,
+                    height: 40,
                     fit: BoxFit.cover,
                   )),
             )),
@@ -221,7 +222,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       actions: [
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            NotificationService.checkAndRequestNotificationPermission(context);
+            NotificationService.showBasicNotification();
+          },
           icon: const Icon(Icons.favorite),
           color: Colors.red,
           iconSize: 28,

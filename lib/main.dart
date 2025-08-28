@@ -6,8 +6,23 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:workmanager/workmanager.dart';
+
+import 'shared/service/notification_service.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+// WorkManager callback
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    await NotificationService.schedule3HourNotifications();
+    return Future.value(true);
+  });
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +39,7 @@ void main() async {
     DeviceOrientation
         .portraitDown, // optional (if you want upside-down portrait too)
   ]);
+  await NotificationService.initialize();
   runApp(const CineMindApp());
 }
 
