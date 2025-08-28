@@ -294,6 +294,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ]),
         const SizedBox(height: 12),
         TextFormField(
+          focusNode: _focusNode,
           readOnly: true,
           controller: controller,
           style: const TextStyle(color: Colors.white),
@@ -561,6 +562,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 final movie = results[index];
                 return GestureDetector(
                   onTap: () async {
+                    _focusNode.unfocus();
                     showDialog(
                         context: context,
                         builder: (_) => const Center(
@@ -628,6 +630,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 final tv = results[index];
                 return GestureDetector(
                   onTap: () async {
+                    _focusNode.unfocus();
                     final tvDetailItem =
                         await TvSerieService().fetchTvSerieByID(tv.id);
                     if (tvDetailItem != null) {
