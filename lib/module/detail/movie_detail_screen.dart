@@ -1,7 +1,6 @@
 import 'package:cinemind/shared/shared_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../model/movie.dart';
 
@@ -28,7 +27,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   }
 
   void _loadLiked() async {
-    bool liked = await prefs.isLoved(widget.movie.id);
+    bool liked = await prefs.isMovieFavorite(widget.movie.id);
     setState(() => _liked = liked);
   }
 
@@ -174,7 +173,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             onPressed: () async {
                               setState(() => _liked = !_liked);
 
-                              prefs.toggleLove(movie.id);
+                              prefs.toggleFavoriteMovie(movie.id);
                             },
                             iconSize: 36,
                             icon: AnimatedSwitcher(

@@ -1,4 +1,4 @@
-// search_screen.dart — FIXED & CLEANED
+// search_screen.dart — KEYBOARD ISSUE FIXED
 import 'dart:async';
 import 'package:cinemind/shared/cubit/search/movie/search_movie_cubit.dart';
 import 'package:cinemind/shared/cubit/search/movie/search_movie_state.dart';
@@ -26,7 +26,8 @@ class SearchScreen extends StatefulWidget {
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState extends State<SearchScreen>
+    with WidgetsBindingObserver {
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -47,12 +48,31 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
 
+    // Add observer for app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
+
     final repo = SearchRepo(SearchService());
     _searchMovieCubit = SearchMovieCubit(repo);
     _searchTvCubit = SearchTvCubit(repo);
 
     _setupSearchListener();
     _setupScrollListener();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Dismiss keyboard when app goes to background/inactive
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _dismissKeyboard();
+    }
+  }
+
+  void _dismissKeyboard() {
+    if (_focusNode.hasFocus) {
+      _focusNode.unfocus();
+      FocusScope.of(context).unfocus();
+    }
   }
 
   void _setupSearchListener() {
@@ -119,6 +139,9 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _showFilterDialog() {
+    // Dismiss keyboard before showing dialog
+    _dismissKeyboard();
+
     showDialog(
       context: context,
       builder: (context) {
@@ -195,6 +218,59 @@ class _SearchScreenState extends State<SearchScreen> {
         });
       },
     );
+  }
+
+  // Helper method for navigating to movie details
+  Future<void> _navigateToMovieDetails(dynamic movie) async {
+    // Dismiss keyboard before navigation
+    _dismissKeyboard();
+
+    showDialog(
+        context: context,
+        builder: (_) => const Center(
+            child: SpinKitSpinningLines(color: CineMindTheme.primaryRed)),
+        barrierDismissible: false);
+    try {
+      final movieDetail = await MovieService().fetchMovieById(movie.id);
+      Navigator.pop(context); // Close loading dialog
+      if (movieDetail != null && mounted) {
+        await Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => MovieDetailsScreen(movie: movieDetail)));
+        // Ensure keyboard stays dismissed after returning
+        _dismissKeyboard();
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to load movie: $e')));
+      }
+    }
+  }
+
+  // Helper method for navigating to TV details
+  Future<void> _navigateToTvDetails(dynamic tv) async {
+    // Dismiss keyboard before navigation
+    _dismissKeyboard();
+
+    try {
+      final tvDetailItem = await TvSerieService().fetchTvSerieByID(tv.id);
+      if (tvDetailItem != null && mounted) {
+        await Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => TvDetailsScreen(tvSerie: tvDetailItem)));
+        // Ensure keyboard stays dismissed after returning
+        _dismissKeyboard();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to load TV series: $e')));
+      }
+    }
   }
 
   Widget _buildAdultToggle(
@@ -294,7 +370,6 @@ class _SearchScreenState extends State<SearchScreen> {
         ]),
         const SizedBox(height: 12),
         TextFormField(
-          focusNode: _focusNode,
           readOnly: true,
           controller: controller,
           style: const TextStyle(color: Colors.white),
@@ -437,6 +512,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
+    // Remove observer
+    WidgetsBinding.instance.removeObserver(this);
+
     _debounce?.cancel();
     _controller.dispose();
     _focusNode.dispose();
@@ -457,26 +535,30 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Search Media",
-                    style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 16),
-                Row(children: [
-                  Expanded(child: _buildSearchTextField()),
-                  const SizedBox(width: 8),
-                  IconButton(
-                      onPressed: _showFilterDialog,
-                      icon:
-                          const Icon(Icons.filter_list, color: Colors.white70),
-                      tooltip: 'Search Filters'),
-                ]),
-                const SizedBox(height: 20),
-                Expanded(child: _buildResults()),
-              ],
+          child: GestureDetector(
+            // Dismiss keyboard when tapping outside
+            onTap: _dismissKeyboard,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Search Media",
+                      style: Theme.of(context).textTheme.headlineMedium),
+                  const SizedBox(height: 16),
+                  Row(children: [
+                    Expanded(child: _buildSearchTextField()),
+                    const SizedBox(width: 8),
+                    IconButton(
+                        onPressed: _showFilterDialog,
+                        icon: const Icon(Icons.filter_list,
+                            color: Colors.white70),
+                        tooltip: 'Search Filters'),
+                  ]),
+                  const SizedBox(height: 20),
+                  Expanded(child: _buildResults()),
+                ],
+              ),
             ),
           ),
         ),
@@ -487,6 +569,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildSearchTextField() {
     return TextFormField(
       controller: _controller,
+      focusNode: _focusNode,
       style: const TextStyle(color: Colors.white),
       autocorrect: false,
       enableSuggestions: false,
@@ -510,8 +593,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 onPressed: () {
                   _controller.clear();
                   _searchMovieCubit.search("");
-                  FocusScope.of(context).unfocus();
                   _searchTvCubit.search("");
+                  _dismissKeyboard();
                   setState(() {});
                 })
             : null,
@@ -521,7 +604,10 @@ class _SearchScreenState extends State<SearchScreen> {
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none),
       ),
-      onFieldSubmitted: (value) => _performSearch(value),
+      onFieldSubmitted: (value) {
+        _performSearch(value);
+        _dismissKeyboard();
+      },
     );
   }
 
@@ -561,31 +647,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 }
                 final movie = results[index];
                 return GestureDetector(
-                  onTap: () async {
-                    _focusNode.unfocus();
-                    showDialog(
-                        context: context,
-                        builder: (_) => const Center(
-                            child: SpinKitSpinningLines(
-                                color: CineMindTheme.primaryRed)),
-                        barrierDismissible: false);
-                    try {
-                      final movieDetail =
-                          await MovieService().fetchMovieById(movie.id);
-                      Navigator.pop(context);
-                      if (movieDetail != null) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) =>
-                                    MovieDetailsScreen(movie: movieDetail)));
-                      }
-                    } catch (e) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to load movie: $e')));
-                    }
-                  },
+                  onTap: () => _navigateToMovieDetails(movie),
                   child: MovieCard(movie: movie),
                 );
               },
@@ -629,18 +691,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 }
                 final tv = results[index];
                 return GestureDetector(
-                  onTap: () async {
-                    _focusNode.unfocus();
-                    final tvDetailItem =
-                        await TvSerieService().fetchTvSerieByID(tv.id);
-                    if (tvDetailItem != null) {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  TvDetailsScreen(tvSerie: tvDetailItem)));
-                    }
-                  },
+                  onTap: () => _navigateToTvDetails(tv),
                   child: TvSerieCard(tvSerie: tv),
                 );
               },

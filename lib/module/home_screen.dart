@@ -6,7 +6,6 @@ import 'package:cinemind/shared/cubit/movie/movie_cubit.dart';
 import 'package:cinemind/shared/cubit/movie/movie_state.dart';
 import 'package:cinemind/shared/repo/movie_repo.dart';
 import 'package:cinemind/shared/repo/tv_repo.dart';
-import 'package:cinemind/shared/service/notification_service.dart';
 import 'package:cinemind/shared/service/tv_serie_service.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -7,26 +7,51 @@ class CustomeShared {
     return await SharedPreferences.getInstance();
   }
 
-  Future<List<int>> getLovedMovies() async {
+  Future<List<int>> getFavoriteMovies() async {
     final prefs = await _prefs();
     List<String>? stringList = prefs.getStringList(loadFavoriteMovieKey);
     return stringList?.map(int.parse).toList() ?? [];
   }
 
-  Future<bool> isLoved(int movieId) async {
-    List<int> loved = await getLovedMovies();
-    return loved.contains(movieId);
+  Future<bool> isMovieFavorite(int movieId) async {
+    List<int> favorites = await getFavoriteMovies();
+    return favorites.contains(movieId);
   }
 
-  Future<void> toggleLove(int movieId) async {
+  Future<void> toggleFavoriteMovie(int movieId) async {
     final prefs = await _prefs();
-    List<int> loved = await getLovedMovies();
-    if (loved.contains(movieId)) {
-      loved.remove(movieId);
+    List<int> favorites = await getFavoriteMovies();
+    if (favorites.contains(movieId)) {
+      favorites.remove(movieId);
     } else {
-      loved.add(movieId);
+      favorites.add(movieId);
     }
     await prefs.setStringList(
-        loadFavoriteMovieKey, loved.map((e) => e.toString()).toList());
+        loadFavoriteMovieKey, favorites.map((e) => e.toString()).toList());
+  }
+
+// favorite tv serie
+  static const String loadFavoriteTvKey = 'favorite_tv';
+  Future<bool> isTvSerieFavorite(int tvSerieId) async {
+    List<int> favorites = await getFavoriteTvSerie();
+    return favorites.contains(tvSerieId);
+  }
+
+  Future<List<int>> getFavoriteTvSerie() async {
+    final prefs = await _prefs();
+    List<String>? stringList = prefs.getStringList(loadFavoriteTvKey);
+    return stringList?.map(int.parse).toList() ?? [];
+  }
+
+  Future<void> toggleFavoriteTv(int tvSerieId) async {
+    final prefs = await _prefs();
+    List<int> Favorites = await getFavoriteTvSerie();
+    if (Favorites.contains(tvSerieId)) {
+      Favorites.remove(tvSerieId);
+    } else {
+      Favorites.add(tvSerieId);
+    }
+    await prefs.setStringList(
+        loadFavoriteTvKey, Favorites.map((e) => e.toString()).toList());
   }
 }

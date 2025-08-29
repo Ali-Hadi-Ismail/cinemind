@@ -7,6 +7,7 @@ import '../../model/season.dart';
 import '../../model/tv_series.dart';
 import '../../shared/repo/tv_repo.dart';
 import '../../shared/service/tv_serie_service.dart';
+import '../../shared/shared_preference.dart';
 
 class TvDetailsScreen extends StatefulWidget {
   final TvSerie tvSerie;
@@ -22,15 +23,22 @@ class TvDetailsScreen extends StatefulWidget {
 
 class _TvDetailsScreenState extends State<TvDetailsScreen> {
   late final Future<List<String>> _imagesFuture;
+  final prefs = CustomeShared();
   bool _liked = false;
   final TvRepo tvRepo = TvRepo(
     service: TvSerieService(),
   );
 
+  void _loadLiked() async {
+    bool liked = await prefs.isTvSerieFavorite(widget.tvSerie.id);
+    setState(() => _liked = liked);
+  }
+
   @override
   void initState() {
     super.initState();
     _imagesFuture = _loadImages();
+    _loadLiked();
   }
 
   Future<List<String>> _loadImages() async {
@@ -227,7 +235,11 @@ class _TvDetailsScreenState extends State<TvDetailsScreen> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () => setState(() => _liked = !_liked),
+                            onPressed: () {
+                              setState(() => _liked = !_liked);
+
+                              prefs.toggleFavoriteTv(tv.id);
+                            },
                             iconSize: 36,
                             icon: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 400),

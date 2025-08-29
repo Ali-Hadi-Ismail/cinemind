@@ -84,7 +84,7 @@ class _SeasonDetailsScreenState extends State<SeasonDetailsScreen> {
                 runSpacing: 4,
                 children: [
                   _buildInfoChip('Episode ${episode.episodeNumber}'),
-                  if (episode.runtime != null && episode.runtime! > 0)
+                  if (episode.runtime > 0)
                     _buildInfoChip('${episode.runtime} min'),
                   if (episode.voteAverage > 0)
                     _buildInfoChip(
@@ -430,8 +430,7 @@ class _SeasonDetailsScreenState extends State<SeasonDetailsScreen> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
-                                              if (episode.runtime != null &&
-                                                  episode.runtime! > 0)
+                                              if (episode.runtime > 0)
                                                 Text(
                                                   '${episode.runtime}m',
                                                   style: const TextStyle(

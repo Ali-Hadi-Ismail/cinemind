@@ -1,3 +1,5 @@
+import 'package:cinemind/module/about_us.dart';
+import 'package:cinemind/module/support_screen.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -93,9 +95,18 @@ class ProfileScreen extends StatelessWidget {
                       fontSize: 16)),
               const SizedBox(height: 10),
               _buildListTile(Icons.notifications, "Notifications"),
-              _buildListTile(Icons.help, "Help & Support"),
-              _buildListTile(Icons.info, "About"),
-              _buildListTile(Icons.star, "Rate Us"),
+              _buildListTile(Icons.help, "Help & Support", function: () async {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HelpSupportScreen()));
+              }),
+
+              _buildListTile(Icons.info, "About", function: () async {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => AboutScreen()));
+              }),
+
               _buildListTile(Icons.logout, "Logout", function: () async {
                 // Show loading dialog
                 showDialog(
