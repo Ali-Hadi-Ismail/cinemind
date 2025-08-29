@@ -637,7 +637,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) =>
+                              builder: (context) =>
                                   TvDetailsScreen(tvSerie: tvDetailItem)));
                     }
                   },
