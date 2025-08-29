@@ -76,17 +76,6 @@ class ProfileScreen extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // Account Section
-              const Text("Account",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16)),
-              const SizedBox(height: 5),
-              _buildListTile(Icons.lock, "Change Password"),
-
-              const SizedBox(height: 20),
-
               // General Section
               const Text("General",
                   style: TextStyle(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../model/movie.dart';
+import '../../shared/widget/image_full_screen.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
@@ -116,26 +117,43 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                 ),
                               ],
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                _normalizeImageUrl(movie.posterPath).isNotEmpty
-                                    ? _normalizeImageUrl(movie.posterPath)
-                                    : 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=300&h=450&fit=crop',
-                                fit: BoxFit.cover,
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return Container(color: Colors.grey[800]);
-                                },
-                                errorBuilder: (context, error, stack) {
-                                  return Container(
-                                    color: Colors.grey[800],
-                                    child: const Center(
-                                      child: Icon(Icons.broken_image,
-                                          color: Colors.white54, size: 40),
+                            child: GestureDetector(
+                              onTap: () {
+                                if (_normalizeImageUrl(movie.posterPath)
+                                    .isNotEmpty) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => FullscreenImagePage(
+                                        imageUrl: _normalizeImageUrl(
+                                            movie.posterPath),
+                                      ),
                                     ),
                                   );
-                                },
+                                }
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  _normalizeImageUrl(movie.posterPath)
+                                          .isNotEmpty
+                                      ? _normalizeImageUrl(movie.posterPath)
+                                      : 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=300&h=450&fit=crop',
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, progress) {
+                                    if (progress == null) return child;
+                                    return Container(color: Colors.grey[800]);
+                                  },
+                                  errorBuilder: (context, error, stack) {
+                                    return Container(
+                                      color: Colors.grey[800],
+                                      child: const Center(
+                                        child: Icon(Icons.broken_image,
+                                            color: Colors.white54, size: 40),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),
@@ -198,7 +216,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -207,7 +226,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         child: Text(
                           movie.tagline,
                           style: const TextStyle(
-                            color: Colors.orange,
+                            color: Colors.red,
                             fontSize: 16,
                             fontStyle: FontStyle.italic,
                             fontWeight: FontWeight.w500,
@@ -248,14 +267,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           'Revenue', '\$${_formatCurrency(movie.revenue)}'),
                     const SizedBox(height: 30),
                     if (movie.genres.isNotEmpty) ...[
-                      const Text(
-                        'Genres',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text('Genres',
+                          style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
@@ -267,13 +280,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       const SizedBox(height: 30),
                     ],
                     if (movie.productionCompanies.isNotEmpty) ...[
-                      const Text(
+                      Text(
                         'Production Companies',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineMedium,
                       ),
                       const SizedBox(height: 16),
                       ...movie.productionCompanies.map(
@@ -309,10 +318,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-        ),
+        style: Theme.of(context).textTheme.headlineMedium,
       ),
     );
   }
