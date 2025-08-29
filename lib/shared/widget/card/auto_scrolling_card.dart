@@ -6,6 +6,7 @@ class AutoScrollingTvCards extends StatefulWidget {
   final Function(int)? onPageChanged;
   final bool showIndicators;
   final Duration autoScrollDuration;
+  final void Function(int index)? onCardTap;
 
   const AutoScrollingTvCards({
     super.key,
@@ -13,6 +14,7 @@ class AutoScrollingTvCards extends StatefulWidget {
     this.onPageChanged,
     this.showIndicators = true,
     this.autoScrollDuration = const Duration(seconds: 3),
+    this.onCardTap, // <--- new
   });
 
   @override
@@ -116,95 +118,103 @@ class _AutoScrollingTvCardsState extends State<AutoScrollingTvCards> {
                 final show = widget.tvShows[index];
                 final isActive = index == _currentIndex;
 
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOutCubic,
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: isActive ? 0 : 16,
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(isActive ? 0.5 : 0.2),
-                          blurRadius: isActive ? 24.0 : 12.0,
-                          spreadRadius: isActive ? 2.0 : 0.0,
-                          offset: Offset(0, isActive ? 12.0 : 6.0),
-                        ),
-                      ],
+                return GestureDetector(
+                  onTap: () {
+                    if (widget.onCardTap != null) {
+                      widget.onCardTap!(index);
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeOutCubic,
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: isActive ? 0 : 16,
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          // Background image
-                          Image.network(
-                            'https://image.tmdb.org/t/p/w500${show.backdropPath ?? ''}',
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.grey.shade800,
-                                child: const Icon(
-                                  Icons.movie,
-                                  color: Colors.white,
-                                  size: 50,
-                                ),
-                              );
-                            },
-                          ),
-                          // Stronger gradient overlay
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withOpacity(0.3),
-                                  Colors.black.withOpacity(0.8),
-                                ],
-                                stops: const [0.3, 0.6, 1.0],
-                              ),
-                            ),
-                          ),
-                          // Content
-                          Positioned(
-                            bottom: 20,
-                            left: 20,
-                            right: 20,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  show.name ?? show.title ?? 'Unknown Title',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                // Add year below title
-                                Text(
-                                  _extractYear(show.firstAirDate ??
-                                      show.releaseDate ??
-                                      ''),
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                              ],
-                            ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                Colors.black.withOpacity(isActive ? 0.5 : 0.2),
+                            blurRadius: isActive ? 24.0 : 12.0,
+                            spreadRadius: isActive ? 2.0 : 0.0,
+                            offset: Offset(0, isActive ? 12.0 : 6.0),
                           ),
                         ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            // Background image
+                            Image.network(
+                              'https://image.tmdb.org/t/p/w500${show.backdropPath ?? ''}',
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey.shade800,
+                                  child: const Icon(
+                                    Icons.movie,
+                                    color: Colors.white,
+                                    size: 50,
+                                  ),
+                                );
+                              },
+                            ),
+                            // Stronger gradient overlay
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.3),
+                                    Colors.black.withOpacity(0.8),
+                                  ],
+                                  stops: const [0.3, 0.6, 1.0],
+                                ),
+                              ),
+                            ),
+                            // Content
+                            Positioned(
+                              bottom: 20,
+                              left: 20,
+                              right: 20,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    show.name ?? show.title ?? 'Unknown Title',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  // Add year below title
+                                  Text(
+                                    _extractYear(show.firstAirDate ??
+                                        show.releaseDate ??
+                                        ''),
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -9,8 +9,8 @@ class TvSerie {
   final bool inProduction;
   final String? lastAirDate;
   final String name;
-  final String? nextEpisodeToAir;
-  final String? lastEpisodeToAir;
+  final dynamic nextEpisodeToAir;
+  final dynamic lastEpisodeToAir;
   final int numberOfEpisodes;
   final String originalLanguage;
   final String overview;

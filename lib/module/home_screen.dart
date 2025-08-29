@@ -1,5 +1,6 @@
 import 'package:cinemind/module/detail/movie_detail_screen.dart';
 import 'package:cinemind/model/movie.dart';
+import 'package:cinemind/module/detail/tv_serie_detail_screen.dart';
 import 'package:cinemind/shared/cubit/movie/movie_cubit.dart';
 import 'package:cinemind/shared/cubit/movie/movie_state.dart';
 import 'package:cinemind/shared/repo/movie_repo.dart';
@@ -258,6 +259,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: AutoScrollingTvCards(
                   tvShows: state.trendingList,
                   autoScrollDuration: const Duration(seconds: 5),
+                  onCardTap: (index) async {
+                    final tvShow = state.trendingList[index];
+                    final tvSerieToPass =
+                        await TvSerieService().fetchTvSerieByID(tvShow.id);
+                    if (tvSerieToPass == null) {
+                      print('Fetching TV series with ID: ${tvShow.id}');
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Failed to load TV show details')),
+                      );
+                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TvDetailsScreen(
+                          tvSerie: tvSerieToPass!,
+                        ),
+                      ),
+                    );
+                  },
                   onPageChanged: (index) {
                     if (index < state.trendingList.length) {
                       final currentShow = state.trendingList[index];
