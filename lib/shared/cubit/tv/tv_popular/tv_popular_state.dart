@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:cinemind/model/tv_series.dart';
+import '../../../../model/tv_series.dart';
 
-/// ---- STATES ---- ///
 abstract class TvPopularState extends Equatable {
   const TvPopularState();
 

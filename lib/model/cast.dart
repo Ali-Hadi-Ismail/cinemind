@@ -11,8 +11,10 @@ class Cast {
   final String character;
   final String creditId;
   final int order;
+  final String biography;
 
   Cast({
+    required this.biography,
     required this.adult,
     required this.gender,
     required this.id,
@@ -29,6 +31,7 @@ class Cast {
 
   factory Cast.fromJson(Map<String, dynamic> json) {
     return Cast(
+      biography: json['biography'] ?? "Who is this guy ?",
       adult: json['adult'] ?? false,
       gender: json['gender'] ?? 0,
       id: json['id'] ?? 0,

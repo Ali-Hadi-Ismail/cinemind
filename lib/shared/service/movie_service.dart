@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cinemind/model/cast.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../model/movie.dart';
 import 'package:http/http.dart' as http;
@@ -149,6 +150,62 @@ class MovieService {
       return [...posters, ...backdrops];
     } else {
       return [];
+    }
+  }
+
+  Future<List<Cast>> getCastByMovieById(int movieId) async {
+    final uri = Uri.https("api.themoviedb.org", "/3/movie/$movieId/credits",
+        {"language": "en-US", "api_key": apiKey});
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final castJson = data['cast'] as List? ?? [];
+        return castJson.map((e) => Cast.fromJson(e)).toList();
+      } else {
+        throw Exception("Failed with status ${response.statusCode}");
+      }
+    } catch (e, stack) {
+      print("💥 Hey king, check this error: $e");
+      print("💥 Stack trace: $stack");
+      return [];
+    }
+  }
+
+  Future<Cast?> getPersonDetailById(int personId) async {
+    final uri = Uri.https(
+      "api.themoviedb.org",
+      "/3/person/$personId",
+      {"language": "en-US", "api_key": apiKey},
+    );
+
+    print("🔹 Requesting person details from TMDb for ID: $personId");
+    print("🔹 URI: $uri");
+
+    try {
+      final response = await http.get(uri);
+
+      print("🔹 Response status: ${response.statusCode}");
+      print("🔹 Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("🔹 JSON decoded successfully");
+
+        // Optionally, print all keys returned
+        print("🔹 Keys in JSON: ${data.keys.toList()}");
+
+        final cast = Cast.fromJson(data);
+        print("🔹 Cast object created: ${cast.name}, ID: ${cast.id}");
+        return cast;
+      } else {
+        print("💥 Failed to get person: ${response.statusCode}");
+        return null;
+      }
+    } catch (e, stack) {
+      print("💥 Exception caught while fetching person details: $e");
+      print("💥 Stack trace: $stack");
+      return null;
     }
   }
 }

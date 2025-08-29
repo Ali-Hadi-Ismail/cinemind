@@ -1,5 +1,6 @@
 import 'package:cinemind/module/about_us.dart';
 import 'package:cinemind/module/support_screen.dart';
+import 'package:cinemind/shared/service/notification_service.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +84,10 @@ class ProfileScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: 16)),
               const SizedBox(height: 10),
-              _buildListTile(Icons.notifications, "Notifications"),
+              _buildListTile(Icons.notifications, "Notifications",
+                  function: () {
+                NotificationService.showBasicNotification();
+              }),
               _buildListTile(Icons.help, "Help & Support", function: () async {
                 Navigator.push(
                     context,

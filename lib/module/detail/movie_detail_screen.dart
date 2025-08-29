@@ -1,9 +1,13 @@
+import 'package:cinemind/shared/service/movie_service.dart';
 import 'package:cinemind/shared/shared_preference.dart';
+import 'package:cinemind/shared/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../model/cast.dart';
 import '../../model/movie.dart';
 import '../../shared/widget/image_full_screen.dart';
+import 'actor_detail_screen.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
@@ -20,16 +24,25 @@ class MovieDetailsScreen extends StatefulWidget {
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   final prefs = CustomeShared();
   bool _liked = false;
+  List<Cast> cast = [];
   @override
   @override
   void initState() {
     super.initState();
     _loadLiked();
+    _loadCast();
   }
 
   void _loadLiked() async {
     bool liked = await prefs.isMovieFavorite(widget.movie.id);
     setState(() => _liked = liked);
+  }
+
+  void _loadCast() async {
+    final data = await MovieService().getCastByMovieById(widget.movie.id);
+    setState(() {
+      cast = data;
+    });
   }
 
   String _normalizeImageUrl(String path, {bool backdrop = false}) {
@@ -298,6 +311,63 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
+                      Divider(),
+                      Text(
+                        'Cast',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3, childAspectRatio: 0.6),
+                        itemCount: cast.length,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          Cast castPerson = cast[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      CastDetailsScreen(castId: castPerson.id),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              color: Colors.blueGrey[8001],
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(
+                                      castPerson.profilePath != null
+                                          ? "https://image.tmdb.org/t/p/w185${castPerson.profilePath}"
+                                          : "https://via.placeholder.com/150x225?text=No+Image",
+                                      width: 100,
+                                      height: 140,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stack) =>
+                                          const Icon(
+                                        Icons.person,
+                                        color: Colors.white54,
+                                        size: 100,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(castPerson.name),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      )
                     ],
                   ],
                 ),
