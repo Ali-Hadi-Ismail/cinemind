@@ -11,38 +11,16 @@ class TvSerieService {
   final String apiKey = dotenv.env['TMDB_API_KEY']!;
   Future<TvSerie?> fetchTvSerieByID(int id) async {
     final url = Uri.parse("$baseUrl$id?api_key=$apiKey");
-    print("🔍 Fetching TV series with ID: $id");
-    print("🌐 URL: $url");
-
     try {
       final response = await http.get(url);
-      print("📊 HTTP Response status: ${response.statusCode}");
-
       if (response.statusCode == 200) {
-        print("✅ Response body: ${response.body}");
-
         final data = jsonDecode(response.body);
-
-        // Optional: print keys in the JSON
-        if (data is Map<String, dynamic>) {
-          print("🗝️ JSON keys: ${data.keys.toList()}");
-        } else {
-          print("⚠️ Warning: response is not a JSON object");
-        }
-
-        final tvSerie = TvSerie.fromJson(data);
-        print(
-            "🎬 Parsed TV series name: ${tvSerie.name}, episodes: ${tvSerie.numberOfEpisodes}");
-        return tvSerie;
+        return TvSerie.fromJson(data);
       } else {
-        print(
-            "❌ Failed to fetch TV series. Status code: ${response.statusCode}");
-        print("❌ Response body: ${response.body}");
-        return null;
+        throw Exception("Failed to fetch season :${response.statusCode} ");
       }
-    } catch (e, stackTrace) {
-      print("💥 Exception while fetching TV series: $e");
-      print(stackTrace);
+    } catch (e) {
+      print("$e");
       return null;
     }
   }

@@ -1,5 +1,7 @@
+import 'package:cinemind/shared/shared_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../model/movie.dart';
 
@@ -16,11 +18,18 @@ class MovieDetailsScreen extends StatefulWidget {
 }
 
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
+  final prefs = CustomeShared();
   bool _liked = false;
-
+  @override
   @override
   void initState() {
     super.initState();
+    _loadLiked();
+  }
+
+  void _loadLiked() async {
+    bool liked = await prefs.isLoved(widget.movie.id);
+    setState(() => _liked = liked);
   }
 
   String _normalizeImageUrl(String path, {bool backdrop = false}) {
@@ -162,8 +171,10 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () {
+                            onPressed: () async {
                               setState(() => _liked = !_liked);
+
+                              prefs.toggleLove(movie.id);
                             },
                             iconSize: 36,
                             icon: AnimatedSwitcher(
