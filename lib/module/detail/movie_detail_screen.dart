@@ -1,6 +1,5 @@
 import 'package:cinemind/shared/service/movie_service.dart';
 import 'package:cinemind/shared/shared_preference.dart';
-import 'package:cinemind/shared/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 

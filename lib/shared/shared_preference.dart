@@ -45,13 +45,13 @@ class CustomeShared {
 
   Future<void> toggleFavoriteTv(int tvSerieId) async {
     final prefs = await _prefs();
-    List<int> Favorites = await getFavoriteTvSerie();
-    if (Favorites.contains(tvSerieId)) {
-      Favorites.remove(tvSerieId);
+    List<int> favorites = await getFavoriteTvSerie();
+    if (favorites.contains(tvSerieId)) {
+      favorites.remove(tvSerieId);
     } else {
-      Favorites.add(tvSerieId);
+      favorites.add(tvSerieId);
     }
     await prefs.setStringList(
-        loadFavoriteTvKey, Favorites.map((e) => e.toString()).toList());
+        loadFavoriteTvKey, favorites.map((e) => e.toString()).toList());
   }
 }

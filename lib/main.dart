@@ -1,5 +1,5 @@
-import 'package:cinemind/layout/home_layout.dart';
 import 'package:cinemind/module/authentication/login_screen.dart';
+import 'package:cinemind/module/impulse_screen.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -64,7 +64,7 @@ class CineMindApp extends StatelessWidget {
 
           // User is logged in
           if (snapshot.hasData) {
-            return const HomeLayout();
+            return ImpulseScreen();
           }
 
           // User not logged in

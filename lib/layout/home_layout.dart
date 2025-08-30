@@ -3,6 +3,7 @@ import 'package:cinemind/module/impulse_screen.dart';
 import 'package:cinemind/module/profile/profile_screen.dart';
 import 'package:cinemind/module/search/search_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeLayout extends StatefulWidget {
   const HomeLayout({super.key});
@@ -36,7 +37,7 @@ class _HomeLayoutState extends State<HomeLayout> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Widget buildNavItem(IconData icon, String label, int index) {
+  Widget buildNavItem(IconData icon, String label, int index, bool isBolt) {
     bool isSelected = _currentIndex == index;
     Color itemColor = index == 2
         ? (isSelected ? Colors.yellow : Colors.grey)
@@ -56,11 +57,11 @@ class _HomeLayoutState extends State<HomeLayout> with TickerProviderStateMixin {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              color: itemColor,
-              size: isSelected ? 28 : 24,
-            ),
+            isBolt
+                ? LottieBuilder.asset(
+                    'asset/lottie/bolt.json',
+                  )
+                : Icon(icon, color: itemColor, size: isSelected ? 28 : 24),
             AnimatedContainer(
               duration: Duration(milliseconds: 200),
               width: isSelected ? 80 : 0,
@@ -111,10 +112,10 @@ class _HomeLayoutState extends State<HomeLayout> with TickerProviderStateMixin {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              buildNavItem(Icons.home, "Home", 0),
-              buildNavItem(Icons.search, "Search", 1),
-              buildNavItem(Icons.bolt, "Impulse", 2),
-              buildNavItem(Icons.person, "Profile", 3),
+              buildNavItem(Icons.home, "Home", 0, false),
+              buildNavItem(Icons.search, "Search", 1, false),
+              buildNavItem(Icons.bolt, "Impulse", 2, true),
+              buildNavItem(Icons.person, "Profile", 3, false),
             ],
           ),
         ),
