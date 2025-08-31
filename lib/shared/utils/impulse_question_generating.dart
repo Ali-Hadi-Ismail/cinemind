@@ -4,8 +4,9 @@ import '../constant/impulse_question_data_model.dart';
 
 // Function to pick 2 random questions from a given list
 List<ImpulseQuestion> pickTwoRandomQuestions(List<ImpulseQuestion> questions) {
-  if (questions.length <= 2)
+  if (questions.length <= 2) {
     return List.from(questions); // if list is small, return all
+  }
 
   final random = Random();
   final selected = <ImpulseQuestion>[];

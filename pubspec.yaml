@@ -50,6 +50,7 @@ flutter:
   assets:
     - asset/images/
     - asset/lottie/
+    - asset/images/impulse/
     - .env
   fonts:
     - family: BebasNeue

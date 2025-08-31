@@ -23,7 +23,8 @@
     "serires",
     "TMDB",
     "unliked",
-    "wakanda"
+    "wakanda",
+    "watchlist"
   ],
   "java.configuration.updateBuildConfiguration": "automatic"
 }

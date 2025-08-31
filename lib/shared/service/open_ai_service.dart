@@ -35,7 +35,7 @@ Rules:
         },
         body: jsonEncode({
           "model": "gpt-5-nano",
-          "input": "${instruction}User Response: ${userPrompt}",
+          "input": "${instruction}User Response: $userPrompt",
         }),
       );
 
@@ -69,7 +69,7 @@ Rules:
 
       return "No text found in response.";
     } catch (e) {
-      return "OpenAI API error: ${e}";
+      return "OpenAI API error: $e";
     }
   }
 }

@@ -1,5 +1,5 @@
 import 'package:cinemind/module/home_screen.dart';
-import 'package:cinemind/module/impulse_screen.dart';
+import 'package:cinemind/module/impulse/impulse_screen.dart';
 import 'package:cinemind/module/profile/profile_screen.dart';
 import 'package:cinemind/module/search/search_screen.dart';
 import 'package:flutter/material.dart';
