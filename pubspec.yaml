@@ -41,6 +41,8 @@ dependencies:
   confetti: ^0.8.0
   flutter_fireworks: ^1.0.8
   flame: ^1.30.1
+  audioplayers: ^6.5.0
+  just_audio: ^0.10.4
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +56,8 @@ flutter:
     - asset/images/
     - asset/lottie/
     - asset/images/impulse/
+    - asset/sound/firework.mp3
+    - asset/sound/
     - .env
   fonts:
     - family: BebasNeue

@@ -22,7 +22,7 @@ class _ImpulseScreenState extends State<ImpulseScreen> {
   void _selectOption(String option) {
     setState(() {
       switch (option.toLowerCase()) {
-        case "Impulse":
+        case "cinemind":
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => CineMindScreen()));
           break;

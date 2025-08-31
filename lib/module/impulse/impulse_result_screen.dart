@@ -1,9 +1,14 @@
+// ImpulseResultScreen.dart
+import 'dart:async';
+
 import 'package:cinemind/module/detail/movie_detail_screen.dart';
 import 'package:cinemind/shared/constant/phrase.dart';
 import 'package:cinemind/shared/service/movie_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fireworks/flutter_fireworks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:lottie/lottie.dart';
 import '../../shared/service/open_ai_service.dart';
 import '../../shared/service/search_service.dart';
 import '../../model/movie.dart';
@@ -20,10 +25,14 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
     with TickerProviderStateMixin {
   final OpenAIService _openAIService = OpenAIService();
   final SearchService _searchService = SearchService();
+
   late FireworksController _fireworksController;
+  Timer? _fireworksTimer;
+  late AudioPlayer _sfxPlayer;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+
   int _currentPhraseIndex = 0;
   String? _responseText;
   List<Movie> _movies = [];
@@ -33,12 +42,18 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
   @override
   void initState() {
     super.initState();
+
     _fireworksController = FireworksController();
+
+    // just_audio player
+    _sfxPlayer = AudioPlayer();
+
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(_fadeController);
+
     _fadeController.addStatusListener((status) {
       if (status == AnimationStatus.completed && _responseText == null) {
         Future.delayed(const Duration(seconds: 1), () {
@@ -54,33 +69,52 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
         });
       }
     });
+
     _fadeController.forward();
+
     _getRecommendation();
   }
 
   Future<void> _getRecommendation() async {
     final response = await _openAIService.sendPrompt(widget.answers);
+
     final movieTitles = parseMovies(response);
     List<Movie> movies = [];
+
     for (var title in movieTitles.take(3)) {
       final results = await _searchService.fetchSearchMovie(query: title);
       if (results.isNotEmpty) movies.add(results.first);
     }
-    if (mounted) {
-      setState(() {
-        _responseText = response;
-        _movies = movies;
+
+    if (!mounted) return;
+
+    setState(() {
+      _responseText = response;
+      _movies = movies;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _fireworksController.fireMultipleRockets(maxRockets: 6);
+      _playFireworkSfx();
+
+      _fireworksTimer?.cancel();
+      _fireworksTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+        if (!mounted) return;
+        _fireworksController.fireMultipleRockets(maxRockets: 4);
+        _playFireworkSfx();
       });
-      // Trigger fireworks after movies are loaded
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _fireworksController.fireMultipleRockets(maxRockets: 5);
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted)
-              _fireworksController.fireMultipleRockets(maxRockets: 5);
-          });
-        }
-      });
+    });
+  }
+
+  Future<void> _playFireworkSfx() async {
+    try {
+      // Load the asset
+      await _sfxPlayer.setAsset('asset/sound/firework.mp3');
+      await _sfxPlayer.setVolume(0.9);
+      await _sfxPlayer.play();
+    } catch (e) {
+      print('SFX play error: $e');
     }
   }
 
@@ -98,29 +132,26 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
     setState(() {
       _isLoadingMovieDetail = true;
     });
-
     try {
       Movie? movieDetail = await MovieService().fetchMovieById(movie.id);
-      if (mounted) {
-        setState(() {
-          _isLoadingMovieDetail = false;
-        });
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MovieDetailsScreen(movie: movieDetail!),
-          ),
-        );
-      }
+      if (!mounted) return;
+      setState(() {
+        _isLoadingMovieDetail = false;
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MovieDetailsScreen(movie: movieDetail!),
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingMovieDetail = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load movie details')),
-        );
-      }
+      if (!mounted) return;
+      setState(() {
+        _isLoadingMovieDetail = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to load movie details')),
+      );
     }
   }
 
@@ -128,6 +159,8 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
   void dispose() {
     _fadeController.dispose();
     _pageController.dispose();
+    _fireworksTimer?.cancel();
+    _sfxPlayer.dispose();
     _fireworksController.dispose();
     super.dispose();
   }
@@ -139,10 +172,7 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
       appBar: AppBar(
         title: const Text(
           "Your Movies Recommendations",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -151,7 +181,6 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
       ),
       body: Stack(
         children: [
-          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -161,25 +190,37 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
               ),
             ),
           ),
-
           SafeArea(
             child: _responseText == null
                 ? Center(
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                        child: Text(
-                          Phrase().loadingPhrases[_currentPhraseIndex],
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                            height: 100,
+                            child: Lottie.asset('asset/lottie/wave.json',
+                                fit: BoxFit.cover)),
+                        SizedBox(
+                          height: 10,
                         ),
-                      ),
+                        FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 32.0),
+                            child: Text(
+                              Phrase().loadingPhrases[_currentPhraseIndex],
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   )
                 : Column(
@@ -192,12 +233,12 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
                               ? _movies.length % Phrase().sarcasticTexts.length
                               : 0],
                           textAlign: TextAlign.center,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white70,
-                                    fontStyle: FontStyle.italic,
-                                    fontWeight: FontWeight.w400,
-                                  ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                  color: Colors.white70,
+                                  fontStyle: FontStyle.italic),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -207,10 +248,9 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
                                 child: Text(
                                   "No movies found... even AI gave up on you",
                                   style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 18,
-                                    fontStyle: FontStyle.italic,
-                                  ),
+                                      color: Colors.white70,
+                                      fontSize: 18,
+                                      fontStyle: FontStyle.italic),
                                 ),
                               )
                             : PageView.builder(
@@ -254,38 +294,6 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
                                                       fit: BoxFit.cover,
                                                       height: 400,
                                                       width: double.infinity,
-                                                      loadingBuilder: (context,
-                                                          child, progress) {
-                                                        if (progress == null)
-                                                          return child;
-                                                        return Container(
-                                                          height: 400,
-                                                          color:
-                                                              Colors.grey[800],
-                                                          child: const Center(
-                                                            child:
-                                                                SpinKitHourGlass(
-                                                                    color: Colors
-                                                                        .red,
-                                                                    size: 30),
-                                                          ),
-                                                        );
-                                                      },
-                                                      errorBuilder: (context,
-                                                          error, stackTrace) {
-                                                        return Container(
-                                                          height: 400,
-                                                          color:
-                                                              Colors.grey[800],
-                                                          child: const Center(
-                                                            child: Icon(
-                                                                Icons.movie,
-                                                                size: 80,
-                                                                color: Colors
-                                                                    .white54),
-                                                          ),
-                                                        );
-                                                      },
                                                     )
                                                   : Container(
                                                       height: 400,
@@ -340,11 +348,13 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
                             onPressed: () => Navigator.pop(context),
                             icon: const Icon(Icons.arrow_back,
                                 size: 22, color: Colors.white),
-                            label: const Text("Back to Impulsive Screen",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white)),
+                            label: const Text(
+                              "Back to Impulsive Screen",
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   Colors.redAccent.withOpacity(0.9),
@@ -361,8 +371,6 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
                     ],
                   ),
           ),
-
-          // Loading overlay for movie details
           if (_isLoadingMovieDetail)
             Container(
               color: Colors.black.withOpacity(0.7),
@@ -383,10 +391,11 @@ class _ImpulseResultScreenState extends State<ImpulseResultScreen>
                 ),
               ),
             ),
-
-          // Fireworks layer
           Positioned.fill(
-              child: FireworksDisplay(controller: _fireworksController)),
+            child: IgnorePointer(
+              child: FireworksDisplay(controller: _fireworksController),
+            ),
+          ),
         ],
       ),
     );

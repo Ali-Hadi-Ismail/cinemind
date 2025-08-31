@@ -1,3 +1,4 @@
+// ignore: unused_import
 import 'package:cinemind/shared/service/open_ai_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cinemind/shared/theme/theme.dart';
