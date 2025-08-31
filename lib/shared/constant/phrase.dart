@@ -1,6 +1,24 @@
 import 'dart:math';
 
 class Phrase {
+  final List<String> loadingPhrases = [
+    "Analyzing your 'incomparable' taste… hold tight.",
+    "Scanning the endless void of mediocre movies…",
+    "Matching your mood… if it exists, somewhere…",
+    "Fetching 'perfect' cinematic gems… theoretically…",
+    "Almost done… brilliance takes time…",
+    "Evaluating your taste… it's complicated, we know…",
+    "Finding movies worthy of your attention… maybe…",
+    "One sec… consulting the film oracles…"
+  ];
+
+  final List<String> sarcasticTexts = [
+    "Oh look, another 'masterpiece' for your refined palate",
+    "Because clearly, this is exactly what you needed today",
+    "Your next obsession awaits… allegedly",
+    "Behold! Cinema that might actually hold your attention",
+    "Another movie to add to your 'I'll watch it someday' list"
+  ];
   String getRandomMoviePhrase() {
     const List<String> phrases = [
       "Sure, keep scrolling… or watch something actually fun.",
