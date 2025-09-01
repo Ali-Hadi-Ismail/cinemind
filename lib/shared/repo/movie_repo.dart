@@ -3,7 +3,7 @@ import '../../model/movie.dart';
 import '../service/movie_service.dart';
 
 class MovieRepository {
-  // Singleton to share inflight caches and Hive box access across app
+  // Singleton
   static final MovieRepository _instance = MovieRepository._internal();
   factory MovieRepository() => _instance;
   MovieRepository._internal();
@@ -12,19 +12,21 @@ class MovieRepository {
   final Box box = Hive.box('movies');
 
   static const cacheDuration = Duration(hours: 24);
+
   // In-flight request cache to deduplicate concurrent calls
   final Map<String, Future<dynamic>> _inflight = {};
 
+  // -------------------------------
+  // Single movie by ID
+  // -------------------------------
   Future<Movie> getMovieById(int id) async {
     final key = 'movie_$id';
 
-    // 1️⃣ Check cache
     if (box.containsKey(key)) {
       final cached = box.get(key);
       return Movie.fromJson(Map<String, dynamic>.from(cached));
     }
 
-    // 2️⃣ Fetch from API
     final movie = await service.fetchMovieById(id);
     if (movie != null) {
       box.put(key, movie.toJson());
@@ -34,7 +36,9 @@ class MovieRepository {
     }
   }
 
-  /// Generic function to get cached data or fetch fresh
+  // -------------------------------
+  // Generic cache handler
+  // -------------------------------
   Future<List<Movie>> _getCachedMovies(
       String key, Future<List<Movie>> Function() fetcher) async {
     final cachedData = box.get(key) as Map?;
@@ -48,7 +52,7 @@ class MovieRepository {
           .toList();
 
       if (isExpired) {
-        // Fetch fresh data in background
+        // Refresh in background
         fetcher().then((freshMovies) {
           box.put(key, {
             'movies': freshMovies.map((e) => e.toJson()).toList(),
@@ -69,31 +73,49 @@ class MovieRepository {
     return movies;
   }
 
+  // -------------------------------
   // Popular movies
+  // -------------------------------
   Future<List<Movie>> getPopularMovies() async {
     return _getCachedMovies('popular', () => service.fetchPopularMovie());
   }
 
+  // -------------------------------
   // Top Rated movies
+  // -------------------------------
   Future<List<Movie>> getTopRatedMovies() async {
     return _getCachedMovies('topRated', () => service.fetchTopRatedMovie());
   }
 
+  // -------------------------------
   // Upcoming movies
+  // -------------------------------
   Future<List<Movie>> getUpcomingMovies() async {
     return _getCachedMovies('upcoming', () => service.fetchUpcomingMovie());
   }
 
-  // Fetch images for a movie with caching
+  // -------------------------------
+  // Trending movies
+  // -------------------------------
+  Future<List<Movie>> getTrendingMovies(String timeWindow, int page) async {
+    final key = 'trending_$timeWindow';
+    return _getCachedMovies(
+      key,
+      () => service.fetchTrendingMovie(page: page, timeWindow),
+    );
+  }
+
+  // -------------------------------
+  // Movie images with caching & dedup
+  // -------------------------------
   Future<List<String>> getMovieImages(int movieId) async {
     final key = 'images_$movieId';
-    final cachedData = box.get(key) as Map?;
 
-    // If a fetch is already in-flight for this key, return the same future
     if (_inflight.containsKey(key)) {
       return await _inflight[key] as List<String>;
     }
 
+    final cachedData = box.get(key) as Map?;
     if (cachedData != null) {
       final lastFetch =
           DateTime.fromMillisecondsSinceEpoch(cachedData['timestamp']);
@@ -101,22 +123,18 @@ class MovieRepository {
 
       final images = (cachedData['images'] as List).cast<String>();
 
-      if (isExpired) {
-        // Refresh in background but don't block current return
-        if (!_inflight.containsKey(key)) {
-          _inflight[key] =
-              service.fetchMovieImages(movieId).then((freshImages) {
-            box.put(key, {
-              'images': freshImages,
-              'timestamp': DateTime.now().millisecondsSinceEpoch,
-            });
-            _inflight.remove(key);
-            return freshImages;
+      if (isExpired && !_inflight.containsKey(key)) {
+        _inflight[key] = service.fetchMovieImages(movieId).then((freshImages) {
+          box.put(key, {
+            'images': freshImages,
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
           });
-        }
+          _inflight.remove(key);
+          return freshImages;
+        });
       }
 
-      // Keep result trimmed and deduped for performance
+      // Deduplicate and trim
       final dedup = <String>[];
       final seen = <String>{};
       for (var u in images) {
@@ -127,9 +145,8 @@ class MovieRepository {
       return dedup;
     }
 
-    // No cache, fetch and save, but dedupe concurrent requests
+    // No cache, fetch
     final fetchFuture = service.fetchMovieImages(movieId).then((images) {
-      // dedupe and limit the number of images to keep memory and network low
       final dedup = <String>[];
       final seen = <String>{};
       for (var s in images) {

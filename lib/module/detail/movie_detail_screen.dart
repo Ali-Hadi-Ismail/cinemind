@@ -1,8 +1,6 @@
 import 'package:cinemind/shared/service/favorite_service.dart';
 import 'package:cinemind/shared/service/movie_service.dart';
-import 'package:cinemind/shared/shared_preference.dart';
 import 'package:cinemind/shared/theme/theme.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -215,17 +213,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        movie.title,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 8),
                                       Wrap(
                                         spacing: 8,
                                         runSpacing: 4,
@@ -259,21 +246,19 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (movie.tagline.isNotEmpty) ...[
-                            Center(
-                              child: Text(
-                                movie.tagline,
-                                style: const TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 16,
-                                  fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.center,
+                          Center(
+                            child: Text(
+                              "\"${movie.title}\"",
+                              style: const TextStyle(
+                                color: Colors.amberAccent,
+                                fontSize: 28,
+                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.bold,
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 20),
-                          ],
+                          ),
+                          const SizedBox(height: 20),
                           Text(
                             'Story Line',
                             style: Theme.of(context).textTheme.headlineMedium,

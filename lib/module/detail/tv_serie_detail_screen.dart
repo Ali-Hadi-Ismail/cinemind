@@ -30,9 +30,7 @@ class _TvDetailsScreenState extends State<TvDetailsScreen> {
   bool isLoadingLike = true;
   bool isLoadingWatchList = true;
   final userId = FirebaseAuth.instance.currentUser!.uid;
-  final TvRepo tvRepo = TvRepo(
-    service: TvSerieService(),
-  );
+  final TvRepo tvRepo = TvRepo(service: TvSerieService());
 
   void _loadLiked() async {
     bool liked = await FavoriteService()

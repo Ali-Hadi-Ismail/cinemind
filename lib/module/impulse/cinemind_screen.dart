@@ -52,14 +52,9 @@ class _CineMindScreenState extends State<CineMindScreen> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black,
-              Colors.black87,
-              Color.fromARGB(255, 203, 20, 17),
-            ],
-            stops: [0.0, 0.5, 1.0],
+            colors: [Colors.black, Colors.redAccent],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         child: SafeArea(

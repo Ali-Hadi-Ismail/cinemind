@@ -2,6 +2,8 @@ import 'package:cinemind/module/detail/movie_detail_screen.dart';
 import 'package:cinemind/model/movie.dart';
 import 'package:cinemind/module/detail/tv_serie_detail_screen.dart';
 import 'package:cinemind/module/impulse/favorite_screen.dart';
+import 'package:cinemind/module/impulse/popular_screen.dart';
+import 'package:cinemind/module/impulse/trending_screen.dart';
 import 'package:cinemind/module/impulse/watchlist_screen.dart';
 import 'package:cinemind/shared/cubit/movie/movie_cubit.dart';
 import 'package:cinemind/shared/cubit/movie/movie_state.dart';
@@ -15,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:palette_generator/palette_generator.dart';
 
+import '../shared/cubit/movie/movie_trending/movie_trending_cubit.dart';
 import '../shared/cubit/tv/tv_trending/tv_trending_cubit.dart';
 import '../shared/cubit/tv/tv_trending/tv_trending_state.dart';
 import '../shared/widget/card/auto_scrolling_card.dart';
@@ -36,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _gradientController;
   late final MovieCubit _movieCubit;
   late final TvTrendingCubit _tvTrendingCubit;
+  late final MovieTrendingCubit _movieTrendingCubit;
+
   // Cache palettes per image url to avoid recomputation
   final Map<String, List<Color>> _paletteCache = {};
   String? _lastPaletteImage;
@@ -46,11 +51,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Create cubits once and fetch data. Do not recreate them on rebuild.
     _movieCubit = MovieCubit(MovieRepository())..fetchAllMovies();
-    _tvTrendingCubit = TvTrendingCubit(
-      repo: TvRepo(
-        service: TvSerieService(),
-      ),
-    )..fetchTrendingList();
+    _tvTrendingCubit = TvTrendingCubit(repo: TvRepo(service: TvSerieService()))
+      ..fetchTrendingList();
+    _movieTrendingCubit = MovieTrendingCubit(repo: MovieRepository())
+      ..fetchTrending('week');
 
     _gradientController = AnimationController(
       duration: const Duration(milliseconds: 1000),
@@ -79,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Close cubits created in initState
     _movieCubit.close();
     _tvTrendingCubit.close();
+    _movieTrendingCubit.close();
     super.dispose();
   }
 
@@ -145,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       providers: [
         BlocProvider.value(value: _movieCubit),
         BlocProvider.value(value: _tvTrendingCubit),
+        BlocProvider.value(value: _movieTrendingCubit),
       ],
       child: AnimatedBuilder(
         animation: _gradientController,
@@ -225,8 +231,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       actions: [
         IconButton(
           onPressed: () {
-            /*   NotificationService.checkAndRequestNotificationPermission(context);
-            NotificationService.showBasicNotification(); */
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -242,8 +246,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         IconButton(
           onPressed: () {
-            /*   NotificationService.checkAndRequestNotificationPermission(context);
-            NotificationService.showBasicNotification(); */
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -259,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       ],
     );
-  }
+  } // Replace your _buildTrendingTvSerie method in home_screen.dart with this:
 
   Widget _buildTrendingTvSerie() {
     return Column(
@@ -267,7 +269,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _sectionHeader("Trending TV Shows"),
         const SizedBox(height: 10),
         BlocBuilder<TvTrendingCubit, TvTrendingState>(
-          buildWhen: (previous, current) => previous != current,
+          buildWhen: (previous, current) {
+            // Only rebuild when the state actually changes
+            if (previous is TvTrendingLoaded && current is TvTrendingLoaded) {
+              return previous.trendingList != current.trendingList ||
+                  previous.isLoadingMore != current.isLoadingMore;
+            }
+            return previous != current;
+          },
           builder: (context, state) {
             if (state is TvTrendingLoading) {
               return SizedBox(
@@ -279,31 +288,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               );
             } else if (state is TvTrendingLoaded) {
               if (state.trendingList.isEmpty) return const SizedBox.shrink();
+
               return SizedBox(
                 height: 240,
                 child: AutoScrollingTvCards(
                   tvShows: state.trendingList,
                   autoScrollDuration: const Duration(seconds: 5),
                   onCardTap: (index) async {
-                    final tvShow = state.trendingList[index];
-                    final tvSerieToPass =
-                        await TvSerieService().fetchTvSerieByID(tvShow.id);
-                    if (tvSerieToPass == null) {
-                      print('Fetching TV series with ID: ${tvShow.id}');
+                    if (index >= state.trendingList.length) return;
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Failed to load TV show details')),
-                      );
-                    }
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TvDetailsScreen(
-                          tvSerie: tvSerieToPass!,
+                    final tvShow = state.trendingList[index];
+
+                    // Show loading dialog
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => const Center(
+                        child: SpinKitHourGlass(
+                          color: CineMindTheme.primaryRed,
                         ),
                       ),
                     );
+
+                    try {
+                      final tvSerieToPass =
+                          await TvSerieService().fetchTvSerieByID(tvShow.id);
+                      Navigator.of(context, rootNavigator: true)
+                          .pop(); // Close loading dialog
+
+                      if (tvSerieToPass != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TvDetailsScreen(
+                              tvSerie: tvSerieToPass,
+                            ),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Failed to load TV show details'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      Navigator.of(context, rootNavigator: true)
+                          .pop(); // Close loading dialog
+                      print(
+                          'Error fetching TV series with ID: ${tvShow.id}, error: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to load TV show details'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   },
                   onPageChanged: (index) {
                     if (index < state.trendingList.length) {
@@ -335,6 +376,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         'Failed to load TV shows',
                         style: TextStyle(color: Colors.grey.shade400),
                       ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<TvTrendingCubit>().fetchTrendingList();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CineMindTheme.primaryRed,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Retry'),
+                      ),
                     ],
                   ),
                 ),
@@ -356,7 +408,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Text(title, style: Theme.of(context).textTheme.headlineMedium),
           GestureDetector(
             onTap: () {
-              // Add navigation to see all screen
+              if (title == "Trending TV Shows") {
+                // Pass the existing cubits to TrendingScreen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(value: _tvTrendingCubit),
+                        BlocProvider.value(value: _movieTrendingCubit),
+                      ],
+                      child: TrendingScreen(),
+                    ),
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PopularScreen()),
+                );
+              }
             },
             child:
                 Text("See All", style: Theme.of(context).textTheme.bodyMedium),

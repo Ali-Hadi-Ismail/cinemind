@@ -208,4 +208,25 @@ class MovieService {
       return null;
     }
   }
+
+  Future<List<Movie>> fetchTrendingMovie(String timeWindow,
+      {int page = 1}) async {
+    final domain = "api.themoviedb.org";
+    final endpoint = "/3/trending/movie/$timeWindow";
+    final queryParams = {'page': page.toString(), 'language': 'en-US'};
+    final url = Uri.https(domain, endpoint, queryParams);
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return (data['results'] as List).map((e) => Movie.fromJson(e)).toList();
+      } else {
+        throw Exception(response.body);
+      }
+    } catch (e) {
+      print("Error fetching trending movies: $e");
+      return [];
+    }
+  }
 }
