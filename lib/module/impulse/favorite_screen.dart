@@ -1,17 +1,18 @@
 import 'package:cinemind/model/movie.dart';
 import 'package:cinemind/module/detail/movie_detail_screen.dart';
 import 'package:cinemind/module/detail/tv_serie_detail_screen.dart';
+import 'package:cinemind/shared/service/favorite_service.dart';
 import 'package:cinemind/shared/service/movie_service.dart';
 import 'package:cinemind/shared/service/tv_serie_service.dart';
-import 'package:cinemind/shared/shared_preference.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:cinemind/shared/widget/card/movie_card.dart';
 import 'package:cinemind/shared/widget/card/tv_card_poster.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
-import '../model/tv_series.dart';
+import '../../model/tv_series.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -25,7 +26,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
   List<TvSerie> favoriteTv = [];
   bool isLoading = true;
   bool showMovies = true; // true = Movies, false = TV Series
-
+  final userId = FirebaseAuth.instance.currentUser!.uid;
   @override
   void initState() {
     super.initState();
@@ -37,7 +38,10 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
     if (showMovies) {
       // Load favorite movies
-      List<int> moviesIdList = await CustomeShared().getFavoriteMovies();
+      List<String> moviesIdListString =
+          await FavoriteService().getAllFavoriteMovie(userId);
+      List<int> moviesIdList =
+          moviesIdListString.map((e) => int.parse(e)).toList();
       List<Movie> movies = [];
       for (int id in moviesIdList) {
         Movie? movie = await MovieService().fetchMovieById(id);
@@ -49,8 +53,10 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         isLoading = false;
       });
     } else {
-      // Load favorite TV series
-      List<int> tvIdList = await CustomeShared().getFavoriteTvSerie();
+      // Load favorite movies
+      List<String> tvIdListString =
+          await FavoriteService().getAllFavoriteTv(userId);
+      List<int> tvIdList = tvIdListString.map((e) => int.parse(e)).toList();
       List<TvSerie> tvSeries = [];
       for (int id in tvIdList) {
         TvSerie? tv = await TvSerieService().fetchTvSerieByID(id);

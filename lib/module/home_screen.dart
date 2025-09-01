@@ -1,7 +1,7 @@
 import 'package:cinemind/module/detail/movie_detail_screen.dart';
 import 'package:cinemind/model/movie.dart';
 import 'package:cinemind/module/detail/tv_serie_detail_screen.dart';
-import 'package:cinemind/module/favorite_screen.dart';
+import 'package:cinemind/module/impulse/favorite_screen.dart';
 import 'package:cinemind/shared/cubit/movie/movie_cubit.dart';
 import 'package:cinemind/shared/cubit/movie/movie_state.dart';
 import 'package:cinemind/shared/repo/movie_repo.dart';
