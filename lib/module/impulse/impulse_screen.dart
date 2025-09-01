@@ -1,4 +1,6 @@
 import 'package:cinemind/module/impulse/cinemind_screen.dart';
+import 'package:cinemind/module/impulse/favorite_screen.dart';
+import 'package:cinemind/module/impulse/watchlist_screen.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -27,8 +29,12 @@ class _ImpulseScreenState extends State<ImpulseScreen> {
               MaterialPageRoute(builder: (context) => CineMindScreen()));
           break;
         case "watchlist":
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => WatchlistScreen()));
           break;
         case "favorite":
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => FavoriteScreen()));
           break;
         case "trending":
           break;

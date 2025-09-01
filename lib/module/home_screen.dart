@@ -2,6 +2,7 @@ import 'package:cinemind/module/detail/movie_detail_screen.dart';
 import 'package:cinemind/model/movie.dart';
 import 'package:cinemind/module/detail/tv_serie_detail_screen.dart';
 import 'package:cinemind/module/impulse/favorite_screen.dart';
+import 'package:cinemind/module/impulse/watchlist_screen.dart';
 import 'package:cinemind/shared/cubit/movie/movie_cubit.dart';
 import 'package:cinemind/shared/cubit/movie/movie_state.dart';
 import 'package:cinemind/shared/repo/movie_repo.dart';
@@ -239,7 +240,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           color: Colors.red,
           iconSize: 28,
         ),
-        const SizedBox(width: 16),
+        IconButton(
+          onPressed: () {
+            /*   NotificationService.checkAndRequestNotificationPermission(context);
+            NotificationService.showBasicNotification(); */
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return WatchlistScreen();
+                },
+              ),
+            );
+          },
+          icon: const Icon(Icons.bookmark),
+          color: Colors.amber,
+          iconSize: 28,
+        ),
       ],
     );
   }

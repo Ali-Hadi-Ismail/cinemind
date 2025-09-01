@@ -1,5 +1,6 @@
 import 'package:cinemind/module/detail/season_detail_screen.dart';
 import 'package:cinemind/shared/service/favorite_service.dart';
+import 'package:cinemind/shared/service/watchlist_service.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import '../../model/season.dart';
 import '../../model/tv_series.dart';
 import '../../shared/repo/tv_repo.dart';
 import '../../shared/service/tv_serie_service.dart';
-import '../../shared/shared_preference.dart';
 
 class TvDetailsScreen extends StatefulWidget {
   final TvSerie tvSerie;
@@ -26,7 +26,9 @@ class TvDetailsScreen extends StatefulWidget {
 class _TvDetailsScreenState extends State<TvDetailsScreen> {
   late final Future<List<String>> _imagesFuture;
   late bool _liked;
+  late bool _inWatchList;
   bool isLoadingLike = true;
+  bool isLoadingWatchList = true;
   final userId = FirebaseAuth.instance.currentUser!.uid;
   final TvRepo tvRepo = TvRepo(
     service: TvSerieService(),
@@ -41,11 +43,23 @@ class _TvDetailsScreenState extends State<TvDetailsScreen> {
     });
   }
 
+  void _loadingWatchList() async {
+    bool isInWatchList = await WatchlistService().checkIfWatchList(
+      widget.tvSerie.id.toString(),
+      userId,
+    );
+    setState(() {
+      _inWatchList = isInWatchList;
+      isLoadingWatchList = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _imagesFuture = _loadImages();
     _loadLiked();
+    _loadingWatchList();
   }
 
   Future<List<String>> _loadImages() async {
@@ -124,7 +138,7 @@ class _TvDetailsScreenState extends State<TvDetailsScreen> {
     final tv = widget.tvSerie;
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
-      body: isLoadingLike
+      body: (isLoadingLike || isLoadingWatchList)
           ? Center(
               child: SpinKitHourGlass(color: CineMindTheme.primaryRed),
             )
@@ -271,6 +285,37 @@ class _TvDetailsScreenState extends State<TvDetailsScreen> {
                                             key: ValueKey(true),
                                             color: Colors.redAccent)
                                         : const Icon(Icons.favorite_border,
+                                            key: ValueKey(false),
+                                            color: Colors.white),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      (_inWatchList)
+                                          ? WatchlistService()
+                                              .removeFromWatchList(
+                                              tv.id.toString(),
+                                              userId,
+                                            )
+                                          : WatchlistService().addToWatchlist(
+                                              userId,
+                                              "tv",
+                                              tv.id.toString(),
+                                            );
+                                      _inWatchList = !_inWatchList;
+                                    });
+                                  },
+                                  iconSize: 36,
+                                  icon: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 500),
+                                    child: _inWatchList
+                                        ? const Icon(Icons.bookmark,
+                                            key: ValueKey(true),
+                                            color: Color.fromARGB(
+                                                255, 243, 190, 31))
+                                        : const Icon(
+                                            Icons.bookmark_border_rounded,
                                             key: ValueKey(false),
                                             color: Colors.white),
                                   ),

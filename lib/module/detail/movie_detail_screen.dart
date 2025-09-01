@@ -10,6 +10,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../model/cast.dart';
 import '../../model/movie.dart';
+import '../../shared/service/watchlist_service.dart';
 import '../../shared/widget/image_full_screen.dart';
 import 'actor_detail_screen.dart';
 
@@ -27,15 +28,29 @@ class MovieDetailsScreen extends StatefulWidget {
 
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   late bool _liked;
+  late bool _inWatchList;
   List<Cast> cast = [];
   bool isLoadingLike = true;
   bool isLoadingCast = true;
+  bool isLoadingWatchList = true;
   final userId = FirebaseAuth.instance.currentUser!.uid;
   @override
   void initState() {
     super.initState();
     _loadLiked();
     _loadCast();
+    _loadingWatchList();
+  }
+
+  void _loadingWatchList() async {
+    bool isInWatchList = await WatchlistService().checkIfWatchList(
+      widget.movie.id.toString(),
+      userId,
+    );
+    setState(() {
+      _inWatchList = isInWatchList;
+      isLoadingWatchList = false;
+    });
   }
 
   void _loadLiked() async {
@@ -70,7 +85,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     final movie = widget.movie;
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
-      body: (isLoadingLike || isLoadingCast)
+      body: (isLoadingLike || isLoadingCast || isLoadingWatchList)
           ? Center(
               child: SpinKitHourGlass(
                 color: CineMindTheme.primaryRed,
@@ -227,32 +242,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                     ],
                                   ),
                                 ),
-                                IconButton(
-                                  onPressed: () async {
-                                    (_liked)
-                                        ? FavoriteService().removeFavorite(
-                                            userId,
-                                            movie.id.toString(),
-                                          )
-                                        : FavoriteService().addFavorite(userId,
-                                            movie.id.toString(), "movie");
-                                    setState(() => _liked = !_liked);
-                                  },
-                                  iconSize: 36,
-                                  icon: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 400),
-                                    transitionBuilder: (child, anim) =>
-                                        ScaleTransition(
-                                            scale: anim, child: child),
-                                    child: _liked
-                                        ? Icon(Icons.favorite,
-                                            key: ValueKey<bool>(_liked),
-                                            color: Colors.redAccent)
-                                        : Icon(Icons.favorite_border,
-                                            key: ValueKey<bool>(_liked),
-                                            color: Colors.white),
-                                  ),
-                                ).animate(onPlay: (controller) {}),
+                                _buildFavoriteButton(movie)
+                                    .animate(onPlay: (controller) {}),
+                                _buildWatchListButton(movie),
                               ],
                             ),
                           ),
@@ -415,6 +407,61 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 ],
               ),
             ),
+    );
+  }
+
+  IconButton _buildWatchListButton(Movie movie) {
+    return IconButton(
+      onPressed: () {
+        setState(() {
+          (_inWatchList)
+              ? WatchlistService().removeFromWatchList(
+                  movie.id.toString(),
+                  userId,
+                )
+              : WatchlistService().addToWatchlist(
+                  userId,
+                  "movie",
+                  movie.id.toString(),
+                );
+          _inWatchList = !_inWatchList;
+        });
+      },
+      iconSize: 36,
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 500),
+        child: _inWatchList
+            ? const Icon(Icons.bookmark,
+                key: ValueKey(true), color: Color.fromARGB(255, 243, 190, 31))
+            : const Icon(Icons.bookmark_border_rounded,
+                key: ValueKey(false), color: Colors.white),
+      ),
+    );
+  }
+
+  IconButton _buildFavoriteButton(Movie movie) {
+    return IconButton(
+      onPressed: () async {
+        (_liked)
+            ? FavoriteService().removeFavorite(
+                userId,
+                movie.id.toString(),
+              )
+            : FavoriteService()
+                .addFavorite(userId, movie.id.toString(), "movie");
+        setState(() => _liked = !_liked);
+      },
+      iconSize: 36,
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        transitionBuilder: (child, anim) =>
+            ScaleTransition(scale: anim, child: child),
+        child: _liked
+            ? Icon(Icons.favorite,
+                key: ValueKey<bool>(_liked), color: Colors.redAccent)
+            : Icon(Icons.favorite_border,
+                key: ValueKey<bool>(_liked), color: Colors.white),
+      ),
     );
   }
 
