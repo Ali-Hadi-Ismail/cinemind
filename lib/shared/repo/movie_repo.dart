@@ -76,8 +76,9 @@ class MovieRepository {
   // -------------------------------
   // Popular movies
   // -------------------------------
-  Future<List<Movie>> getPopularMovies() async {
-    return _getCachedMovies('popular', () => service.fetchPopularMovie());
+  Future<List<Movie>> getPopularMovies(int page) async {
+    return _getCachedMovies(
+        'popular_page_$page', () => service.fetchPopularMovie(page: page));
   }
 
   // -------------------------------

@@ -1,62 +1,75 @@
-/* import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
-class AuthProvider extends ChangeNotifier {
-  static final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-  static bool isinitialized = false;
+Future<void> resetUserData(BuildContext context) async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
 
-  static Future<void> _initSignin() async {
-    if (!isinitialized) {
-      await _googleSignIn.initialize(
-          serverClientId:
-              "562101504181-ppkujm9rltcpct40n5pte85eflnmvjud.apps.googleusercontent.com");
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Confirm Reset'),
+      content: const Text(
+          'Are you sure you want to delete all your data? This cannot be undone.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Delete', style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
 
-      isinitialized = true;
+  if (confirm != true) return;
+
+  // Show loading
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => const Center(
+      child: CircularProgressIndicator(color: Colors.red),
+    ),
+  );
+
+  try {
+    final favorites = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('favorites');
+    final watchList = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('watchlist');
+    final snapshotsFavorite = await favorites.get();
+
+    for (var doc in snapshotsFavorite.docs) {
+      await doc.reference.delete();
     }
-  }
+    final snapshotsWatchList = await watchList.get();
 
-  //for signin
-
-  static Future<UserCredential> signinWithGoogle() async {
-    await _initSignin();
-    final GoogleSignInAccount account = await _googleSignIn.authenticate();
-    if (account == null) {
-      throw FirebaseAuthException(
-          code: "SIGN IN ABORTED BY USER",
-          message: "User did not complete the sign-in");
+    for (var doc in snapshotsWatchList.docs) {
+      await doc.reference.delete();
     }
-    final idToken = account.authentication.idToken;
-    final authClient = account.authorizationClient;
 
-    GoogleSignInClientAuthorization? auth =
-        await authClient.authorizationForScopes(['email', 'profile']);
-
-    final accessToken = auth?.accessToken;
-    if (accessToken == null) {
-      final auth2 = await authClient.authorizationForScopes(
-        ['email', 'profile'],
-      );
-      if (auth2?.accessToken == null) {
-        throw FirebaseAuthException(
-          code: "No Accesss Token",
-          message: "Fail to retrive google access token",
-        );
-      }
-      auth = auth2;
-    }
-    final credential = GoogleAuthProvider.credential(
-      idToken: idToken,
-      accessToken: accessToken,
+    Navigator.pop(context); // close loading
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('All your data has been deleted.'),
+        backgroundColor: Colors.green,
+      ),
     );
-
-    return await FirebaseAuth.instance.signInWithCredential(credential);
-  }
-
-  //For Sign out
-  static Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    await FirebaseAuth.instance.signOut();
+  } catch (e) {
+    Navigator.pop(context); // close loading
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to reset data: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 }
- */

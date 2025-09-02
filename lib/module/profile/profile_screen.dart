@@ -1,12 +1,13 @@
 import 'package:cinemind/module/about_us.dart';
 import 'package:cinemind/module/support_screen.dart';
+import 'package:cinemind/shared/repo/auth_repo.dart';
 import 'package:cinemind/shared/service/notification_service.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-import '../../shared/provider/auth_provider.dart';
+import '../../shared/cubit/tv/tv_trending/provider/auth_provider.dart';
 import '../authentication/login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -98,6 +99,9 @@ class ProfileScreen extends StatelessWidget {
               _buildListTile(Icons.info, "About", function: () async {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => AboutScreen()));
+              }),
+              _buildListTile(Icons.info, "Reset Data", function: () async {
+                resetUserData(context);
               }),
 
               _buildListTile(Icons.logout, "Logout", function: () async {

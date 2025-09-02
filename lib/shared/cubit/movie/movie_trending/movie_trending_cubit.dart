@@ -12,7 +12,9 @@ class MovieTrendingCubit extends Cubit<MovieTrendingState> {
 
   void fetchTrending(String timeWindow) async {
     if (state is MovieTrendingLoaded &&
-        (state as MovieTrendingLoaded).hasReachedEnd) return;
+        (state as MovieTrendingLoaded).hasReachedEnd) {
+      return;
+    }
 
     try {
       if (state is! MovieTrendingLoaded) {

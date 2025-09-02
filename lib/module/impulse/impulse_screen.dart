@@ -1,8 +1,17 @@
 import 'package:cinemind/module/impulse/cinemind_screen.dart';
 import 'package:cinemind/module/impulse/favorite_screen.dart';
+import 'package:cinemind/module/impulse/popular_screen.dart';
+import 'package:cinemind/module/impulse/trending_screen.dart';
 import 'package:cinemind/module/impulse/watchlist_screen.dart';
+import 'package:cinemind/shared/cubit/tv/tv_trending/tv_trending_cubit.dart';
 import 'package:cinemind/shared/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../shared/cubit/movie/movie_popular/movie_popular_cubit.dart';
+import '../../shared/repo/movie_repo.dart';
+import '../../shared/repo/tv_repo.dart';
+import '../../shared/service/tv_serie_service.dart';
 
 class ImpulseScreen extends StatefulWidget {
   const ImpulseScreen({super.key});
@@ -37,8 +46,32 @@ class _ImpulseScreenState extends State<ImpulseScreen> {
               MaterialPageRoute(builder: (context) => FavoriteScreen()));
           break;
         case "trending":
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MultiBlocProvider(
+                        providers: [
+                          BlocProvider.value(
+                              value: TvTrendingCubit(
+                                  repo: TvRepo(service: TvSerieService()))
+                                ..fetchTrendingList())
+                        ],
+                        child: TrendingScreen(),
+                      )));
           break;
         case "popular":
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(
+                            value: MoviePopularCubit(repo: MovieRepository())
+                              ..fetchPopularMovies())
+                      ],
+                      child: PopularMoviesScreen(),
+                    )),
+          );
           break;
       }
     });

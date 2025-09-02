@@ -20,7 +20,7 @@ class MovieCubit extends Cubit<MovieState> {
     }
 
     try {
-      final popular = await repo.getPopularMovies();
+      final popular = await repo.getPopularMovies(1);
       final topRated = await repo.getTopRatedMovies();
       final upcoming = await repo.getUpcomingMovies();
 
@@ -101,7 +101,7 @@ class MovieCubit extends Cubit<MovieState> {
 
       switch (category) {
         case "popular":
-          movies = await repo.getPopularMovies();
+          movies = await repo.getPopularMovies(1);
           emit(currentState.copyWith(popular: movies));
           break;
         case "top_rated":

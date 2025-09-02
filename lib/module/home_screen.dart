@@ -6,6 +6,7 @@ import 'package:cinemind/module/impulse/popular_screen.dart';
 import 'package:cinemind/module/impulse/trending_screen.dart';
 import 'package:cinemind/module/impulse/watchlist_screen.dart';
 import 'package:cinemind/shared/cubit/movie/movie_cubit.dart';
+import 'package:cinemind/shared/cubit/movie/movie_popular/movie_popular_cubit.dart';
 import 'package:cinemind/shared/cubit/movie/movie_state.dart';
 import 'package:cinemind/shared/repo/movie_repo.dart';
 import 'package:cinemind/shared/repo/tv_repo.dart';
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Color targetGradientEnd = const Color(0xFF16213E);
   late AnimationController _gradientController;
   late final MovieCubit _movieCubit;
+  late final MoviePopularCubit _moviePopularCubit;
   late final TvTrendingCubit _tvTrendingCubit;
   late final MovieTrendingCubit _movieTrendingCubit;
 
@@ -55,7 +57,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ..fetchTrendingList();
     _movieTrendingCubit = MovieTrendingCubit(repo: MovieRepository())
       ..fetchTrending('week');
-
+    _moviePopularCubit = MoviePopularCubit(repo: MovieRepository())
+      ..fetchPopularMovies();
     _gradientController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -425,7 +428,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               } else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PopularScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(value: _moviePopularCubit),
+                      ],
+                      child: PopularMoviesScreen(),
+                    ),
+                  ),
                 );
               }
             },
