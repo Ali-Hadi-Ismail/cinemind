@@ -100,7 +100,7 @@ class ProfileScreen extends StatelessWidget {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => AboutScreen()));
               }),
-              _buildListTile(Icons.info, "Reset Data", function: () async {
+              _buildListTile(Icons.refresh, "Reset Data", function: () async {
                 resetUserData(context);
               }),
 

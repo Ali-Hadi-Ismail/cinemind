@@ -1,16 +1,9 @@
 <resources>
-    <!-- Launch Theme applied while Flutter initializes -->
     <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
-        <item name="android:forceDarkAllowed" type="bool">false</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
-        <!-- Optional: your logo in center -->
         <item name="android:windowBackground">@drawable/launch_background</item>
-    </style>
-
-    <!-- Normal Theme after Flutter UI is drawn -->
-    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
-        <item name="android:windowBackground">@android:color/black</item>
+        <!-- No windowSplashScreenAnimatedIcon -->
     </style>
 </resources>

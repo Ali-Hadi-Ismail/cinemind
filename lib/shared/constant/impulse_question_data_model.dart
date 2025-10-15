@@ -107,35 +107,6 @@ final List<ImpulseQuestion> moodQuestions = [
   ),
 ];
 
-// era questions
-final List<ImpulseQuestion> eraQuestions = [
-  ImpulseQuestion(
-    id: 21,
-    question: "Do you prefer movies from the 1950s or 1960s?",
-    choices: ["before 2000", "after 2000"],
-  ),
-  ImpulseQuestion(
-    id: 24,
-    question: "Do you prefer films from the 2010s or 2020s?",
-    choices: ["2010s", "2020s"],
-  ),
-  ImpulseQuestion(
-    id: 25,
-    question: "Do you enjoy black-and-white classics or modern color films?",
-    choices: ["Black-and-White", "Color"],
-  ),
-  ImpulseQuestion(
-    id: 26,
-    question: "Do you prefer silent-era or sound-era films?",
-    choices: ["Silent", "Sound"],
-  ),
-  ImpulseQuestion(
-    id: 27,
-    question: "Do you like early special-effects films or modern CGI films?",
-    choices: ["Early Effects", "Modern CGI"],
-  ),
-];
-
 // pace question
 final List<ImpulseQuestion> pacingQuestions = [
   ImpulseQuestion(
@@ -197,26 +168,9 @@ final List<ImpulseQuestion> pacingQuestions = [
 // character question
 final List<ImpulseQuestion> characterQuestions = [
   ImpulseQuestion(
-    id: 41,
-    question: "Do you prefer movies with heroic protagonists or antiheroes?",
-    choices: ["Heroic", "Antihero"],
-  ),
-  ImpulseQuestion(
-    id: 42,
-    question:
-        "Do you like movies with young protagonists or older protagonists?",
-    choices: ["Young", "Older"],
-  ),
-  ImpulseQuestion(
     id: 43,
     question: "Do you enjoy movies with strong female leads or male leads?",
     choices: ["Female Lead", "Male Lead"],
-  ),
-  ImpulseQuestion(
-    id: 44,
-    question:
-        "Do you prefer movies with relatable characters or larger-than-life characters?",
-    choices: ["Relatable", "Larger-than-Life"],
   ),
   ImpulseQuestion(
     id: 45,
@@ -229,12 +183,6 @@ final List<ImpulseQuestion> characterQuestions = [
     question:
         "Do you enjoy movies with morally complex characters or clearly good/bad characters?",
     choices: ["Morally Complex", "Clear Good/Bad"],
-  ),
-  ImpulseQuestion(
-    id: 47,
-    question:
-        "Do you prefer movies with individual protagonists or ensemble casts?",
-    choices: ["Individual", "Ensemble"],
   ),
   ImpulseQuestion(
     id: 48,
@@ -278,11 +226,6 @@ final List<ImpulseQuestion> settingQuestions = [
     question:
         "Do you like movies set in one main location or multiple locations?",
     choices: ["One Location", "Multiple Locations"],
-  ),
-  ImpulseQuestion(
-    id: 56,
-    question: "Do you prefer movies set on Earth or in space/other planets?",
-    choices: ["Earth", "Space/Other Planets"],
   ),
   ImpulseQuestion(
     id: 57,
@@ -334,17 +277,6 @@ final List<ImpulseQuestion> toneQuestions = [
     id: 65,
     question: "Do you enjoy movies that are fast-paced or slow-paced?",
     choices: ["Fast-paced", "Slow-paced"],
-  ),
-  ImpulseQuestion(
-    id: 66,
-    question:
-        "Do you prefer movies with a dark/gloomy atmosphere or a bright/hopeful atmosphere?",
-    choices: ["Dark/Gloomy", "Bright/Hopeful"],
-  ),
-  ImpulseQuestion(
-    id: 67,
-    question: "Do you like movies that are suspenseful or relaxed?",
-    choices: ["Suspenseful", "Relaxed"],
   ),
   ImpulseQuestion(
     id: 68,

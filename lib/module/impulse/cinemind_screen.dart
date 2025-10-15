@@ -17,8 +17,7 @@ class CineMindScreen extends StatefulWidget {
 class _CineMindScreenState extends State<CineMindScreen> {
   User? user = FirebaseAuth.instance.currentUser;
   void startQuestionnaire() {
-    final questions =
-        getQuestionToAsk(); // your function returning List<ImpulseQuestion>
+    final questions = getQuestionToAsk();
 
     Navigator.push(
       context,

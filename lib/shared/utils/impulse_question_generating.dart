@@ -11,7 +11,7 @@ List<ImpulseQuestion> pickTwoRandomQuestions(List<ImpulseQuestion> questions) {
   final random = Random();
   final selected = <ImpulseQuestion>[];
 
-  while (selected.length < 2) {
+  while (selected.length < 1) {
     final question = questions[random.nextInt(questions.length)];
     if (!selected.contains(question)) {
       selected.add(question);
@@ -25,7 +25,6 @@ List<ImpulseQuestion> getQuestionToAsk() {
   List<ImpulseQuestion> list = [];
   list.addAll(pickTwoRandomQuestions(generQuestions));
   list.addAll(pickTwoRandomQuestions(moodQuestions));
-  list.addAll(pickTwoRandomQuestions(eraQuestions));
   list.addAll(pickTwoRandomQuestions(pacingQuestions));
   list.addAll(pickTwoRandomQuestions(characterQuestions));
   list.addAll(pickTwoRandomQuestions(settingQuestions));
