@@ -37,10 +37,3 @@ Discover trending movies, explore TV series, save favorites, and get personalize
 - **State Management** – Bloc
 
 ---
-
-## ⚡ Installation
-
-1. **Clone the repo**:
-```bash
-git clone https://github.com/YourUsername/cinemind.git
-cd cinemind
