@@ -52,7 +52,11 @@ class _MovieCardPosterState extends State<MovieCardPoster> {
                             child: SpinKitHourGlass(
                                 color: CineMindTheme.primaryRed));
                       } else if (snapshot.hasError) {
-                        return const Center(child: Text("Error loading image"));
+                        return Container(
+                            color: CineMindTheme.cardDark.withOpacity(0.5),
+                            child: const Center(
+                              child: Icon(Icons.wifi_off_rounded),
+                            ));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return const Center(child: Text("No images found"));
                       } else {

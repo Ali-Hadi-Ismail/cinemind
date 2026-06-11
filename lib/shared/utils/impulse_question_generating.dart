@@ -11,7 +11,7 @@ List<ImpulseQuestion> pickTwoRandomQuestions(List<ImpulseQuestion> questions) {
   final random = Random();
   final selected = <ImpulseQuestion>[];
 
-  while (selected.length < 1) {
+  while (selected.isEmpty) {
     final question = questions[random.nextInt(questions.length)];
     if (!selected.contains(question)) {
       selected.add(question);
